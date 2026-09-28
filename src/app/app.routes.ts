@@ -38,10 +38,45 @@ export const routes: Routes = [
     loadComponent: () => import('./pages/account/account').then(m => m.Account)
   },
   {
-    path: 'admin',
-    canActivate: [authGuard, adminGuard],
-    loadComponent: () => import('./pages/admin/admin').then(m => m.Admin)
-  },
+  path: 'admin',
+  canActivate: [authGuard, adminGuard],
+  loadComponent: () => import('./pages/admin/admin').then(m => m.Admin),
+  children: [
+    {
+      path: '',
+      redirectTo: 'dashboard',
+      pathMatch: 'full'
+    },
+    {
+      path: 'dashboard',
+      loadComponent: () => import('./pages/admin/admin-dashboard/admin-dashboard').then(m => m.AdminDashboard)
+    },
+    {
+      path: 'users',
+      loadComponent: () => import('./pages/admin/admin-users/admin-users').then(m => m.AdminUsers)
+    },
+    {
+      path: 'lessons',
+      loadComponent: () => import('./pages/admin/admin-lessons/admin-lessons').then(m => m.AdminLessons)
+    },
+    {
+      path: 'exercises',
+      loadComponent: () => import('./pages/admin/admin-exercises/admin-exercises').then(m => m.AdminExercises)
+    },
+    {
+      path: 'projects',
+      loadComponent: () => import('./pages/admin/admin-projects/admin-projects').then(m => m.AdminProjects)
+    },
+    {
+      path: 'quizzes',
+      loadComponent: () => import('./pages/admin/admin-quizzes/admin-quizzes').then(m => m.AdminQuizzes)
+    },
+    {
+      path: 'audit-logs',
+      loadComponent: () => import('./pages/admin/admin-audit-logs/admin-audit-logs').then(m => m.AdminAuditLogs)
+    }
+  ]
+},
   {
     path: '**',
     redirectTo: ''

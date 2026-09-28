@@ -1,0 +1,17 @@
+.stat-card {
+  display: flex;
+  flex-direction: column;
+  padding: 25px;
+  background: #fff;
+  border-radius: 10px;
+  border: 1px solid #e5e5e5;
+}
+
+.stat-card span {
+  color: #6c757d;
+}
+
+.stat-card strong {
+  margin-top: 5px;
+  font-size: 2rem;
+}

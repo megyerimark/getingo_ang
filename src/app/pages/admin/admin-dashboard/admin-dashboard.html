@@ -1,0 +1,51 @@
+<h1 class="mb-4">Dashboard</h1>
+
+@if (loading) {
+  <div class="spinner-border"></div>
+}
+
+@if (stats) {
+  <div class="row g-3">
+    <div class="col-md-3">
+      <div class="stat-card">
+        <span>Felhasználók</span>
+        <strong>{{ stats.users.total }}</strong>
+      </div>
+    </div>
+
+    <div class="col-md-3">
+      <div class="stat-card">
+        <span>Diákok</span>
+        <strong>{{ stats.users.students }}</strong>
+      </div>
+    </div>
+
+    <div class="col-md-3">
+      <div class="stat-card">
+        <span>Adminok</span>
+        <strong>{{ stats.users.admins }}</strong>
+      </div>
+    </div>
+
+    <div class="col-md-3">
+      <div class="stat-card">
+        <span>Kitiltva</span>
+        <strong>{{ stats.users.banned }}</strong>
+      </div>
+    </div>
+
+    <div class="col-md-6">
+      <div class="stat-card">
+        <span>Teljesített leckék</span>
+        <strong>{{ stats.learning_stats.lessons_completed }}</strong>
+      </div>
+    </div>
+
+    <div class="col-md-6">
+      <div class="stat-card">
+        <span>Sikeres kvízek</span>
+        <strong>{{ stats.learning_stats.quizzes_passed }}</strong>
+      </div>
+    </div>
+  </div>
+}

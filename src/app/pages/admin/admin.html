@@ -1,1 +1,22 @@
-<p>admin works!</p>
+<div class="admin-layout">
+  <aside class="admin-sidebar">
+    <h3>Getingo Admin</h3>
+
+    <a routerLink="/admin/dashboard" routerLinkActive="active">Dashboard</a>
+    <a routerLink="/admin/users" routerLinkActive="active">Felhasználók</a>
+    <a routerLink="/admin/lessons" routerLinkActive="active">Leckék</a>
+    <a routerLink="/admin/exercises" routerLinkActive="active">Feladatok</a>
+    <a routerLink="/admin/projects" routerLinkActive="active">Projektek</a>
+    <a routerLink="/admin/quizzes" routerLinkActive="active">Kvízek</a>
+    <a routerLink="/admin/audit-logs" routerLinkActive="active">Audit log</a>
+
+    <div class="sidebar-bottom">
+      <a routerLink="/">← Vissza az oldalra</a>
+      <button class="btn btn-outline-danger w-100" type="button" (click)="logout()">Kilépés</button>
+    </div>
+  </aside>
+
+  <main class="admin-content">
+    <router-outlet></router-outlet>
+  </main>
+</div>
