@@ -15,9 +15,9 @@
 
         <a
           routerLink="/admin/dashboard"
-          routerLinkActive="active">
+          routerLinkActive="active"
+          [routerLinkActiveOptions]="{ exact: true }">
           <i class="bi bi-grid-1x2"></i>
-
           <span>Dashboard</span>
         </a>
       </div>
@@ -29,7 +29,6 @@
           routerLink="/admin/categories"
           routerLinkActive="active">
           <i class="bi bi-folder"></i>
-
           <span>Kategóriák</span>
         </a>
 
@@ -37,7 +36,6 @@
           routerLink="/admin/lessons"
           routerLinkActive="active">
           <i class="bi bi-book"></i>
-
           <span>Tananyagok</span>
         </a>
 
@@ -45,7 +43,6 @@
           routerLink="/admin/quizzes"
           routerLinkActive="active">
           <i class="bi bi-patch-question"></i>
-
           <span>Kvízek</span>
         </a>
 
@@ -53,7 +50,6 @@
           routerLink="/admin/exercises"
           routerLinkActive="active">
           <i class="bi bi-check2-square"></i>
-
           <span>Feladatok</span>
         </a>
 
@@ -61,7 +57,6 @@
           routerLink="/admin/projects"
           routerLinkActive="active">
           <i class="bi bi-code-square"></i>
-
           <span>Projektek</span>
         </a>
       </div>
@@ -69,11 +64,15 @@
       <div class="nav-section">
         <span class="nav-section-title">Rendszer</span>
 
+        <a routerLink="/dashboard">
+          <i class="bi bi-person-circle"></i>
+          <span>Fiókom</span>
+        </a>
+
         <a
           routerLink="/admin/users"
           routerLinkActive="active">
           <i class="bi bi-people"></i>
-
           <span>Felhasználók</span>
         </a>
 
@@ -81,7 +80,6 @@
           routerLink="/admin/audit-logs"
           routerLinkActive="active">
           <i class="bi bi-shield-check"></i>
-
           <span>Audit napló</span>
         </a>
       </div>
@@ -92,7 +90,6 @@
         class="back-link"
         routerLink="/">
         <i class="bi bi-arrow-left"></i>
-
         <span>Vissza az oldalra</span>
       </a>
 
@@ -101,7 +98,6 @@
         type="button"
         (click)="logout()">
         <i class="bi bi-box-arrow-right"></i>
-
         <span>Kilépés</span>
       </button>
     </div>
@@ -125,21 +121,26 @@
           <i class="bi bi-bell"></i>
         </button>
 
-        <div class="admin-profile">
+        <a
+          class="admin-profile"
+          routerLink="/dashboard">
+
           <div class="profile-avatar">
             A
           </div>
 
           <div class="profile-info">
             <strong>Admin</strong>
-            <span>Administrator</span>
+            <span>Fiókom</span>
           </div>
-        </div>
+
+          <i class="bi bi-chevron-right profile-arrow"></i>
+        </a>
       </div>
     </header>
 
     <main class="admin-content">
-    <router-outlet></router-outlet>
+      <router-outlet></router-outlet>
     </main>
   </div>
 </div>
