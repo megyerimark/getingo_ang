@@ -12,10 +12,13 @@ export class Navbar implements OnInit {
   constructor(public auth: Auth, private router: Router) {}
 
   ngOnInit(): void {
+  this.auth.restoreSession().subscribe();
+}
+/*   ngOnInit(): void {
     if (this.auth.isLoggedIn() && !this.auth.currentUser()) {
       this.auth.me().subscribe({ error: () => this.auth.clearAuth() });
     }
-  }
+  } */
 
   logout(): void {
     this.auth.logout().subscribe({

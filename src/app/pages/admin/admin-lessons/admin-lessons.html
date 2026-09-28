@@ -1,77 +1,219 @@
-<h1 class="mb-4">Leckék</h1>
+<div class="admin-lessons">
+  <div class="page-header">
+    <div>
+      <h1>Tananyagok</h1>
+      <p>Leckék létrehozása és szerkesztése.</p>
+    </div>
+  </div>
 
-@if (message) {
-  <div class="alert alert-success">{{ message }}</div>
-}
+  @if (message) {
+    <div class="alert alert-success">
+      {{ message }}
+    </div>
+  }
 
-@if (errorMessage) {
-  <div class="alert alert-danger">{{ errorMessage }}</div>
-}
+  @if (errorMessage) {
+    <div class="alert alert-danger">
+      {{ errorMessage }}
+    </div>
+  }
 
-<div class="card mb-4">
-  <div class="card-body">
-    <h4>{{ editingId ? 'Lecke szerkesztése' : 'Új lecke' }}</h4>
+  <section class="editor-card">
+    <h2>
+      {{ editingLesson ? 'Tananyag szerkesztése' : 'Új tananyag' }}
+    </h2>
 
-    <form [formGroup]="form" (ngSubmit)="save()">
-      <div class="row g-3">
-        <div class="col-md-4">
-          <select class="form-select" formControlName="category_id">
-            <option [ngValue]="null">Kategória</option>
-            @for (category of categories; track category.id) {
-              <option [ngValue]="category.id">{{ category.name }}</option>
-            }
-          </select>
+    <form
+      [formGroup]="form"
+      (ngSubmit)="save()">
+
+      <div class="mb-3">
+        <label class="form-label">
+          Kategória
+        </label>
+
+        <select
+          class="form-select"
+          formControlName="category_id">
+          <option [ngValue]="null">
+            Válassz kategóriát
+          </option>
+
+          @for (
+            category of categories;
+            track category.id
+          ) {
+            <option [ngValue]="category.id">
+              {{ category.name }}
+            </option>
+          }
+        </select>
+      </div>
+
+      <div class="mb-3">
+        <label class="form-label">
+          Cím
+        </label>
+
+        <input
+          class="form-control"
+          type="text"
+          formControlName="title"
+          (input)="titleChanged()"
+          placeholder="Pl. JavaScript változók">
+      </div>
+
+      <div class="mb-3">
+        <label class="form-label">
+          Slug
+        </label>
+
+        <input
+          class="form-control"
+          type="text"
+          formControlName="slug"
+          placeholder="javascript-valtozok">
+      </div>
+
+      <div class="mb-4">
+        <label class="form-label">
+          Tananyag
+        </label>
+
+        <textarea
+          class="form-control"
+          rows="10"
+          formControlName="content"
+          placeholder="A tananyag szövege...">
+        </textarea>
+      </div>
+
+      <div class="code-fields">
+        <div class="code-field">
+          <div class="code-title html-title">
+            HTML
+          </div>
+
+          <textarea
+            class="code-input"
+            formControlName="example_html"
+            spellcheck="false"
+            placeholder="<button id='button'>Indul</button>">
+          </textarea>
         </div>
 
-        <div class="col-md-4">
-          <input class="form-control" formControlName="title" placeholder="Cím">
+        <div class="code-field">
+          <div class="code-title css-title">
+            CSS
+          </div>
+
+          <textarea
+            class="code-input"
+            formControlName="example_css"
+            spellcheck="false"
+            placeholder="button { padding: 10px; }">
+          </textarea>
         </div>
 
-        <div class="col-md-4">
-          <input class="form-control" formControlName="slug" placeholder="slug">
-        </div>
+        <div class="code-field">
+          <div class="code-title js-title">
+            JavaScript
+          </div>
 
-        <div class="col-12">
-          <textarea class="form-control" rows="8" formControlName="content" placeholder="Tananyag"></textarea>
-        </div>
-
-        <div class="col-12">
-          <textarea class="form-control font-monospace" rows="6" formControlName="example_code" placeholder="Példakód"></textarea>
+          <textarea
+            class="code-input"
+            formControlName="example_javascript"
+            spellcheck="false"
+            placeholder="console.log('Hello');">
+          </textarea>
         </div>
       </div>
 
-      <button class="btn btn-success mt-3" type="submit">{{ editingId ? 'Mentés' : 'Létrehozás' }}</button>
+      <div class="d-flex gap-2 mt-4">
+        <button
+          class="btn btn-success"
+          type="submit"
+          [disabled]="saving">
 
-      @if (editingId) {
-        <button class="btn btn-secondary mt-3 ms-2" type="button" (click)="cancel()">Mégse</button>
-      }
+          @if (saving) {
+            Mentés...
+          } @else {
+            {{ editingLesson ? 'Módosítás mentése' : 'Tananyag létrehozása' }}
+          }
+        </button>
+
+        @if (editingLesson) {
+          <button
+            class="btn btn-outline-secondary"
+            type="button"
+            (click)="cancelEdit()">
+            Mégse
+          </button>
+        }
+      </div>
     </form>
-  </div>
-</div>
+  </section>
 
-<div class="table-responsive">
-  <table class="table table-hover bg-white">
-    <thead>
-      <tr>
-        <th>ID</th>
-        <th>Cím</th>
-        <th>Slug</th>
-        <th>Művelet</th>
-      </tr>
-    </thead>
+  <section class="lesson-list">
+    <h2>Meglévő tananyagok</h2>
 
-    <tbody>
+    @if (loading) {
+      <div class="text-center py-4">
+        <div class="spinner-border"></div>
+      </div>
+    } @else {
       @for (lesson of lessons; track lesson.id) {
-        <tr>
-          <td>{{ lesson.id }}</td>
-          <td>{{ lesson.title }}</td>
-          <td>{{ lesson.slug }}</td>
-          <td>
-            <button class="btn btn-sm btn-primary me-2" (click)="edit(lesson)">Szerkesztés</button>
-            <button class="btn btn-sm btn-danger" (click)="delete(lesson.id)">Törlés</button>
-          </td>
-        </tr>
+        <div class="lesson-row">
+          <div>
+            <div class="lesson-category">
+              {{ lesson.category?.name ?? 'Kategória' }}
+            </div>
+
+            <h3>{{ lesson.title }}</h3>
+
+            <small>
+              /{{ lesson.slug }}
+            </small>
+
+            <div class="code-badges">
+              @if (lesson.example_html) {
+                <span>HTML</span>
+              }
+
+              @if (lesson.example_css) {
+                <span>CSS</span>
+              }
+
+              @if (
+                lesson.example_javascript ||
+                lesson.example_code
+              ) {
+                <span>JavaScript</span>
+              }
+            </div>
+          </div>
+
+          <div class="lesson-actions">
+            <button
+              class="btn btn-outline-primary btn-sm"
+              type="button"
+              (click)="edit(lesson)">
+              Szerkesztés
+            </button>
+
+            <button
+              class="btn btn-outline-danger btn-sm"
+              type="button"
+              (click)="deleteLesson(lesson)">
+              Törlés
+            </button>
+          </div>
+        </div>
+      } @empty {
+        <div class="alert alert-info">
+          Még nincs tananyag.
+        </div>
       }
-    </tbody>
-  </table>
+    }
+  </section>
 </div>

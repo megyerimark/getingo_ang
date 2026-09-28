@@ -1,4 +1,106 @@
+
 import { Injectable, signal } from '@angular/core';
+import { HttpClient } from '@angular/common/http';
+import { catchError, Observable, of, switchMap, tap } from 'rxjs';
+import { environment } from '../../environments/environment';
+import { AuthResponse, MeResponse, User } from '../core/models/user.model';
+
+@Injectable({
+  providedIn: 'root'
+})
+export class Auth {
+  private readonly apiUrl = environment.apiUrl;
+  private readonly csrfUrl = environment.csrfUrl;
+
+  currentUser = signal<User | null>(null);
+
+  constructor(private http: HttpClient) {}
+
+  private csrf(): Observable<void> {
+    return this.http.get<void>(this.csrfUrl, {
+      withCredentials: true
+    });
+  }
+
+  register(data: {
+    name: string;
+    email: string;
+    password: string;
+    password_confirmation: string;
+  }): Observable<AuthResponse> {
+    return this.csrf().pipe(
+      switchMap(() =>
+        this.http.post<AuthResponse>(
+          `${this.apiUrl}/regisztracio`,
+          data,
+          { withCredentials: true }
+        )
+      ),
+      tap(response => this.currentUser.set(response.user))
+    );
+  }
+
+  login(data: {
+    email: string;
+    password: string;
+  }): Observable<AuthResponse> {
+    return this.csrf().pipe(
+      switchMap(() =>
+        this.http.post<AuthResponse>(
+          `${this.apiUrl}/bejelentkezes`,
+          data,
+          { withCredentials: true }
+        )
+      ),
+      tap(response => this.currentUser.set(response.user))
+    );
+  }
+
+  me(): Observable<User> {
+    return this.http.get<MeResponse>(
+      `${this.apiUrl}/user`,
+      { withCredentials: true }
+    ).pipe(
+      tap(response => this.currentUser.set(response.user)),
+      switchMap(response => of(response.user))
+    );
+  }
+
+  restoreSession(): Observable<User | null> {
+    return this.me().pipe(
+      catchError(() => {
+        this.clearAuth();
+        return of(null);
+      })
+    );
+  }
+
+  logout(): Observable<{ message: string }> {
+    return this.csrf().pipe(
+      switchMap(() =>
+        this.http.post<{ message: string }>(
+          `${this.apiUrl}/logout`,
+          {},
+          { withCredentials: true }
+        )
+      ),
+      tap(() => this.clearAuth())
+    );
+  }
+
+  isLoggedIn(): boolean {
+    return this.currentUser() !== null;
+  }
+
+  clearAuth(): void {
+    this.currentUser.set(null);
+  }
+}
+
+
+
+
+/* import { Injectable, signal } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable, map, tap } from 'rxjs';
 import { environment } from '../../environments/environment';
@@ -74,4 +176,4 @@ export class Auth {
     localStorage.removeItem(this.tokenKey);
     this.currentUser.set(null);
   }
-}
+} */

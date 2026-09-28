@@ -3,6 +3,7 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
 import { Subject, takeUntil } from 'rxjs';
 import { SearchResponse, SearchService } from '../../services/search';
+import { environment } from '../../../environments/environment';
 
 @Component({
   selector: 'app-search',

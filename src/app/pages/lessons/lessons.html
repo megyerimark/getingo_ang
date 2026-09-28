@@ -20,11 +20,15 @@
 
     <main class="lesson-main">
       @if (message) {
-        <div class="alert alert-success">{{ message }}</div>
+        <div class="alert alert-success">
+          {{ message }}
+        </div>
       }
 
       @if (errorMessage) {
-        <div class="alert alert-danger">{{ errorMessage }}</div>
+        <div class="alert alert-danger">
+          {{ errorMessage }}
+        </div>
       }
 
       @if (activeLesson) {
@@ -35,64 +39,160 @@
             {{ activeLesson.content }}
           </div>
 
-          @if (activeLesson.example_code) {
+        @if (
+  activeLesson.example_html ||
+  activeLesson.example_css ||
+  activeLesson.example_javascript ||
+  activeLesson.example_code
+) {
             <section class="original-code-section">
               <div class="section-heading">
                 <div>
                   <h3>Eredeti példa</h3>
-                  <span>Az admin által létrehozott kód</span>
+                  <span>Az admin által létrehozott mintakód.</span>
                 </div>
-                <span class="badge text-bg-secondary">Csak olvasható</span>
+
+                <span class="badge text-bg-secondary">
+                  Csak olvasható
+                </span>
               </div>
 
-              <pre class="original-code"><code>{{ activeLesson.example_code }}</code></pre>
-            </section>
+              @if (activeLesson.example_html) {
+                <div class="code-block">
+                  <div class="code-block-header">
+                    HTML
+                  </div>
+
+                  <pre class="original-code"><code>{{ activeLesson.example_html }}</code></pre>
+                </div>
+              }
+
+              @if (activeLesson.example_css) {
+                <div class="code-block mt-3">
+                  <div class="code-block-header">
+                    CSS
+                  </div>
+
+                  <pre class="original-code"><code>{{ activeLesson.example_css }}</code></pre>
+                </div>
+              }
+
+@if (activeLesson.example_javascript || activeLesson.example_code) {
+  <div class="code-block mt-3">
+    <div class="code-block-header">
+      JavaScript
+    </div>
+
+    <pre class="original-code"><code>{{ activeLesson.example_javascript ?? activeLesson.example_code }}</code></pre>
+  </div>
+}        </section>
 
             <section class="workspace-section">
               <div class="section-heading">
                 <div>
-                  <h3>Saját kódszerkesztő</h3>
-                  <span>Az eredeti kód saját másolata. Szabadon módosíthatod és futtathatod.</span>
+                  <h3>Próbáld ki</h3>
+                  <span>
+                    Módosítsd a példakódot, majd futtasd.
+                  </span>
                 </div>
 
                 @if (personalCodeSaved) {
-                  <span class="badge text-bg-success">Mentve</span>
+                  <span class="badge text-bg-success">
+                    Mentve
+                  </span>
                 }
               </div>
 
               @if (codeLoading) {
-                <div class="spinner-border spinner-border-sm"></div>
+                <div class="text-center py-4">
+                  <div class="spinner-border spinner-border-sm"></div>
+                </div>
               } @else {
-                <textarea
-                  class="code-editor"
-                  spellcheck="false"
-                  [formControl]="workspaceCode">
-                </textarea>
-
-                <div class="d-flex flex-wrap gap-2 mt-3">
-                  @if (auth.isLoggedIn()) {
+                <div class="w3-editor">
+                  <div class="editor-tabs">
                     <button
-                      class="btn btn-primary"
+                      class="editor-tab"
                       type="button"
-                      (click)="savePersonalCode()">
-                      Saját kód mentése
+                      [class.active]="activeCodeTab === 'html'"
+                      (click)="setCodeTab('html')">
+                      HTML
                     </button>
-                  } @else {
-                    <a class="btn btn-primary" routerLink="/login">
-                      Belépés a mentéshez
-                    </a>
-                  }
 
-                  <button
-                    class="btn btn-outline-secondary"
-                    type="button"
-                    (click)="resetPersonalCode()">
-                    Eredeti visszaállítása
-                  </button>
+                    <button
+                      class="editor-tab"
+                      type="button"
+                      [class.active]="activeCodeTab === 'css'"
+                      (click)="setCodeTab('css')">
+                      CSS
+                    </button>
+
+                    <button
+                      class="editor-tab"
+                      type="button"
+                      [class.active]="activeCodeTab === 'javascript'"
+                      (click)="setCodeTab('javascript')">
+                      JavaScript
+                    </button>
+                  </div>
+
+                  <div class="editor-body">
+                    @if (activeCodeTab === 'html') {
+                      <textarea
+                        class="code-editor"
+                        spellcheck="false"
+                        [formControl]="htmlCode"
+                        placeholder="Írd ide a HTML kódot...">
+                      </textarea>
+                    }
+
+                    @if (activeCodeTab === 'css') {
+                      <textarea
+                        class="code-editor"
+                        spellcheck="false"
+                        [formControl]="cssCode"
+                        placeholder="Írd ide a CSS kódot...">
+                      </textarea>
+                    }
+
+                    @if (activeCodeTab === 'javascript') {
+                      <textarea
+                        class="code-editor"
+                        spellcheck="false"
+                        [formControl]="javascriptCode"
+                        placeholder="Írd ide a JavaScript kódot...">
+                      </textarea>
+                    }
+                  </div>
+
+                  <div class="editor-footer">
+                    @if (auth.isLoggedIn()) {
+                      <button
+                        class="btn btn-primary"
+                        type="button"
+                        (click)="savePersonalCode()">
+                        Saját kód mentése
+                      </button>
+                    } @else {
+                      <a
+                        class="btn btn-primary"
+                        routerLink="/login">
+                        Belépés a mentéshez
+                      </a>
+                    }
+
+                    <button
+                      class="btn btn-outline-secondary"
+                      type="button"
+                      (click)="resetPersonalCode()">
+                      Eredeti visszaállítása
+                    </button>
+                  </div>
                 </div>
 
                 <app-code-runner
-                  [code]="workspaceCode.value">
+                  [html]="htmlCode.value"
+                  [css]="cssCode.value"
+                  [javascript]="javascriptCode.value">
                 </app-code-runner>
               }
             </section>
@@ -128,7 +228,9 @@
                   </div>
 
                   @if (activeNote) {
-                    <span class="badge text-bg-success">Mentve</span>
+                    <span class="badge text-bg-success">
+                      Mentve
+                    </span>
                   }
                 </div>
 
@@ -161,16 +263,26 @@
           } @else {
             <div class="login-notice">
               <h4>Szeretnéd elmenteni a munkádat?</h4>
+
               <p>
-                A tananyag, kódszerkesztő, kódfuttató és kvíz bejelentkezés nélkül is használható.
-                Saját kód mentéséhez, jegyzeteléshez, kedvencekhez és XP gyűjtéshez jelentkezz be.
+                A tananyag, a HTML/CSS/JavaScript szerkesztő,
+                a kódfuttató és a kvíz bejelentkezés nélkül is használható.
               </p>
 
-              <a class="btn btn-success me-2" routerLink="/login">
+              <p>
+                Saját kód mentéséhez, jegyzeteléshez,
+                kedvencekhez és XP gyűjtéshez jelentkezz be.
+              </p>
+
+              <a
+                class="btn btn-success me-2"
+                routerLink="/login">
                 Belépés
               </a>
 
-              <a class="btn btn-outline-success" routerLink="/register">
+              <a
+                class="btn btn-outline-success"
+                routerLink="/register">
                 Regisztráció
               </a>
             </div>

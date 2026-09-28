@@ -125,4 +125,5 @@ updateCategory(id: number, data: Omit<Category, 'id' | 'lessons_count' | 'exerci
 deleteCategory(id: number): Observable<any> {
   return this.http.delete(`${this.apiUrl}/categories/${id}`);
 }
+
 }

@@ -1,45 +1,25 @@
 <div class="runner">
-  <div class="runner-header">
-    <div class="mode-selector">
-      <button
-        type="button"
-        class="mode-btn"
-        [class.active]="mode === 'html'"
-        (click)="setMode('html')">
-        HTML
-      </button>
-
-      <button
-        type="button"
-        class="mode-btn"
-        [class.active]="mode === 'css'"
-        (click)="setMode('css')">
-        CSS
-      </button>
-
-      <button
-        type="button"
-        class="mode-btn"
-        [class.active]="mode === 'javascript'"
-        (click)="setMode('javascript')">
-        JavaScript
-      </button>
-    </div>
+  <div class="runner-toolbar">
+    <span class="runner-title">Eredmény</span>
 
     <div class="runner-actions">
-      <button class="btn btn-success btn-sm" type="button" (click)="run()">
+      <button
+        class="btn btn-success btn-sm"
+        type="button"
+        (click)="run()">
         ▶ Futtatás
       </button>
 
       @if (hasRun) {
-        <button class="btn btn-outline-secondary btn-sm" type="button" (click)="clear()">
-          Eredmény törlése
+        <button
+          class="btn btn-outline-secondary btn-sm"
+          type="button"
+          (click)="clear()">
+          Törlés
         </button>
       }
     </div>
   </div>
-
-  <div class="preview-title">Eredmény</div>
 
   <iframe
     #previewFrame

@@ -15,7 +15,10 @@ export class Home implements OnInit {
   loading = true;
   search = new FormControl('', { nonNullable: true });
 
-  constructor(private categoryService: CategoryService, private router: Router) {}
+  constructor(
+    private categoryService: CategoryService,
+    private router: Router
+  ) {}
 
   ngOnInit(): void {
     this.categoryService.getAll().subscribe({
@@ -23,13 +26,21 @@ export class Home implements OnInit {
         this.categories = categories;
         this.loading = false;
       },
-      error: () => this.loading = false
+      error: () => {
+        this.loading = false;
+      }
     });
   }
 
   searchContent(): void {
     const query = this.search.value.trim();
-    if (query.length < 2) return;
-    this.router.navigate(['/search'], { queryParams: { q: query } });
+
+    if (query.length < 2) {
+      return;
+    }
+
+    this.router.navigate(['/search'], {
+      queryParams: { q: query }
+    });
   }
 }

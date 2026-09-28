@@ -13,7 +13,14 @@ export interface AdminLesson {
   title: string;
   slug: string;
   content: string;
-  example_code: string | null;
+  example_code?: string | null;
+  example_html?: string | null;
+  example_css?: string | null;
+  example_javascript?: string | null;
+  category?: {
+    id: number;
+    name: string;
+  };
 }
 
 export interface AdminExercise {

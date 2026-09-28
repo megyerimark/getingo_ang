@@ -14,16 +14,37 @@ import { CategoryService } from '../../../services/category';
 export class AdminLessons implements OnInit {
   lessons: AdminLesson[] = [];
   categories: Category[] = [];
-  editingId: number | null = null;
+  editingLesson: AdminLesson | null = null;
+  loading = true;
+  saving = false;
   message = '';
   errorMessage = '';
 
   form = new FormGroup({
-    category_id: new FormControl<number | null>(null, Validators.required),
-    title: new FormControl('', { nonNullable: true, validators: Validators.required }),
-    slug: new FormControl('', { nonNullable: true, validators: Validators.required }),
-    content: new FormControl('', { nonNullable: true, validators: Validators.required }),
-    example_code: new FormControl('', { nonNullable: true })
+    category_id: new FormControl<number | null>(null, {
+      validators: [Validators.required]
+    }),
+    title: new FormControl('', {
+      nonNullable: true,
+      validators: [Validators.required]
+    }),
+    slug: new FormControl('', {
+      nonNullable: true,
+      validators: [Validators.required]
+    }),
+    content: new FormControl('', {
+      nonNullable: true,
+      validators: [Validators.required]
+    }),
+    example_html: new FormControl('', {
+      nonNullable: true
+    }),
+    example_css: new FormControl('', {
+      nonNullable: true
+    }),
+    example_javascript: new FormControl('', {
+      nonNullable: true
+    })
   });
 
   constructor(
@@ -32,29 +53,44 @@ export class AdminLessons implements OnInit {
   ) {}
 
   ngOnInit(): void {
-    this.load();
-    this.categoryService.getAll().subscribe(categories => this.categories = categories);
+    this.loadCategories();
+    this.loadLessons();
   }
 
-  load(): void {
+  loadCategories(): void {
+    this.categoryService.getAll().subscribe({
+      next: categories => {
+        this.categories = categories;
+      }
+    });
+  }
+
+  loadLessons(): void {
+    this.loading = true;
+
     this.adminService.getLessons().subscribe({
-      next: lessons => this.lessons = lessons,
-      error: () => this.errorMessage = 'Nem sikerült betölteni a leckéket.'
+      next: lessons => {
+        this.lessons = lessons;
+        this.loading = false;
+      },
+      error: () => {
+        this.errorMessage = 'Nem sikerült betölteni a leckéket.';
+        this.loading = false;
+      }
     });
   }
 
-  edit(lesson: AdminLesson): void {
-    this.editingId = lesson.id;
-    this.form.patchValue({
-      ...lesson,
-      example_code: lesson.example_code ?? ''
-    });
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-  }
+  titleChanged(): void {
+    if (this.editingLesson) return;
 
-  cancel(): void {
-    this.editingId = null;
-    this.form.reset();
+    const slug = this.form.controls.title.value
+      .toLowerCase()
+      .normalize('NFD')
+      .replace(/[\u0300-\u036f]/g, '')
+      .replace(/[^a-z0-9]+/g, '-')
+      .replace(/^-+|-+$/g, '');
+
+    this.form.controls.slug.setValue(slug);
   }
 
   save(): void {
@@ -63,39 +99,116 @@ export class AdminLessons implements OnInit {
       return;
     }
 
-    const value = this.form.getRawValue();
+    const categoryId = this.form.controls.category_id.value;
+
+    if (!categoryId) return;
 
     const data = {
-      category_id: Number(value.category_id),
-      title: value.title,
-      slug: value.slug,
-      content: value.content,
-      example_code: value.example_code || null
+      category_id: categoryId,
+      title: this.form.controls.title.value,
+      slug: this.form.controls.slug.value,
+      content: this.form.controls.content.value,
+      example_html: this.form.controls.example_html.value,
+      example_css: this.form.controls.example_css.value,
+      example_javascript: this.form.controls.example_javascript.value
     };
 
-    const request = this.editingId
-      ? this.adminService.updateLesson(this.editingId, data)
+    this.saving = true;
+    this.message = '';
+    this.errorMessage = '';
+
+    const request = this.editingLesson
+      ? this.adminService.updateLesson(
+          this.editingLesson.id,
+          data
+        )
       : this.adminService.createLesson(data);
 
     request.subscribe({
-      next: () => {
-        this.message = this.editingId ? 'Lecke módosítva.' : 'Lecke létrehozva.';
-        this.cancel();
-        this.load();
+      next: response => {
+        this.message =
+          response.message ?? 'Tananyag elmentve.';
+        this.saving = false;
+        this.resetForm();
+        this.loadLessons();
       },
-      error: error => this.errorMessage = error.error?.message ?? 'Hiba történt.'
+      error: error => {
+        this.errorMessage =
+          error.error?.message ?? 'Nem sikerült menteni.';
+        this.saving = false;
+      }
     });
   }
 
-  delete(id: number): void {
-    if (!confirm('Biztosan törlöd ezt a leckét?')) return;
+  edit(lesson: AdminLesson): void {
+    this.editingLesson = lesson;
+    this.message = '';
+    this.errorMessage = '';
 
-    this.adminService.deleteLesson(id).subscribe({
-      next: () => {
-        this.message = 'Lecke törölve.';
-        this.load();
+    this.form.setValue({
+      category_id: lesson.category_id,
+      title: lesson.title,
+      slug: lesson.slug,
+      content: lesson.content,
+      example_html: lesson.example_html ?? '',
+      example_css: lesson.example_css ?? '',
+      example_javascript:
+        lesson.example_javascript ??
+        lesson.example_code ??
+        ''
+    });
+
+    window.scrollTo({
+      top: 0,
+      behavior: 'smooth'
+    });
+  }
+
+  cancelEdit(): void {
+    this.resetForm();
+  }
+
+  deleteLesson(lesson: AdminLesson): void {
+    if (
+      !confirm(
+        `Biztosan törlöd ezt a leckét: ${lesson.title}?`
+      )
+    ) {
+      return;
+    }
+
+    this.adminService.deleteLesson(lesson.id).subscribe({
+      next: response => {
+        this.message =
+          response.message ?? 'Lecke törölve.';
+
+        this.lessons = this.lessons.filter(
+          item => item.id !== lesson.id
+        );
+
+        if (this.editingLesson?.id === lesson.id) {
+          this.resetForm();
+        }
       },
-      error: () => this.errorMessage = 'Nem sikerült törölni.'
+      error: error => {
+        this.errorMessage =
+          error.error?.message ??
+          'Nem sikerült törölni a leckét.';
+      }
+    });
+  }
+
+  private resetForm(): void {
+    this.editingLesson = null;
+
+    this.form.reset({
+      category_id: null,
+      title: '',
+      slug: '',
+      content: '',
+      example_html: '',
+      example_css: '',
+      example_javascript: ''
     });
   }
 }

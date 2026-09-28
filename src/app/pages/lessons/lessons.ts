@@ -13,7 +13,7 @@ import { LessonQuiz } from '../../shared/lesson-quiz/lesson-quiz';
 
 @Component({
   selector: 'app-lessons',
-  imports: [ReactiveFormsModule, RouterLink, CodeRunner,LessonQuiz],
+  imports: [ReactiveFormsModule, RouterLink, CodeRunner, LessonQuiz],
   templateUrl: './lessons.html',
   styleUrl: './lessons.scss'
 })
@@ -22,14 +22,22 @@ export class Lessons implements OnInit {
   notes: Note[] = [];
   activeLesson: Lesson | null = null;
   activeNote: Note | null = null;
+
   loading = true;
   codeLoading = false;
   personalCodeSaved = false;
+
   message = '';
   errorMessage = '';
 
+  htmlCode = new FormControl('', { nonNullable: true });
+  cssCode = new FormControl('', { nonNullable: true });
+  javascriptCode = new FormControl('', { nonNullable: true });
   note = new FormControl('', { nonNullable: true });
-  workspaceCode = new FormControl('', { nonNullable: true });
+  activeCodeTab: 'html' | 'css' | 'javascript' = 'html';
+  setCodeTab(tab: 'html' | 'css' | 'javascript'): void {
+  this.activeCodeTab = tab;
+}
 
   constructor(
     private route: ActivatedRoute,
@@ -42,7 +50,9 @@ export class Lessons implements OnInit {
   ) {}
 
   ngOnInit(): void {
-    const categoryId = Number(this.route.snapshot.paramMap.get('categoryId'));
+    const categoryId = Number(
+      this.route.snapshot.paramMap.get('categoryId')
+    );
 
     if (!categoryId) {
       this.errorMessage = 'Hibás kategória.';
@@ -53,19 +63,25 @@ export class Lessons implements OnInit {
     this.lessonService.getByCategory(categoryId).subscribe({
       next: lessons => {
         this.lessons = lessons;
-        const lessonId = Number(this.route.snapshot.queryParamMap.get('lesson'));
 
-this.activeLesson = lessonId
-  ? lessons.find(lesson => lesson.id === lessonId) ?? lessons[0] ?? null
-  : lessons[0] ?? null;
+        const lessonId = Number(
+          this.route.snapshot.queryParamMap.get('lesson')
+        );
+
+        this.activeLesson = lessonId
+          ? lessons.find(lesson => lesson.id === lessonId) ?? lessons[0] ?? null
+          : lessons[0] ?? null;
+
         this.loading = false;
 
-        if (this.auth.isLoggedIn()) {
-          this.loadNotes();
-          this.loadPersonalCode();
-        } else {
-          this.loadGuestCode();
-        }
+        this.auth.restoreSession().subscribe(user => {
+          if (user) {
+            this.loadNotes();
+            this.loadPersonalCode();
+          } else {
+            this.loadGuestCode();
+          }
+        });
       },
       error: () => {
         this.errorMessage = 'Nem sikerült betölteni a tananyagokat.';
@@ -78,6 +94,7 @@ this.activeLesson = lessonId
     this.activeLesson = lesson;
     this.message = '';
     this.errorMessage = '';
+
     this.loadActiveNote();
 
     if (this.auth.isLoggedIn()) {
@@ -86,13 +103,31 @@ this.activeLesson = lessonId
       this.loadGuestCode();
     }
 
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+    window.scrollTo({
+      top: 0,
+      behavior: 'smooth'
+    });
   }
 
-  loadGuestCode(): void {
-    this.personalCodeSaved = false;
-    this.workspaceCode.setValue(this.activeLesson?.example_code ?? '');
-  }
+loadGuestCode(): void {
+  if (!this.activeLesson) return;
+
+  this.personalCodeSaved = false;
+
+  this.htmlCode.setValue(
+    this.activeLesson.example_html ?? ''
+  );
+
+  this.cssCode.setValue(
+    this.activeLesson.example_css ?? ''
+  );
+
+  this.javascriptCode.setValue(
+    this.activeLesson.example_javascript ??
+    this.activeLesson.example_code ??
+    ''
+  );
+}
 
   loadPersonalCode(): void {
     if (!this.activeLesson) return;
@@ -101,12 +136,15 @@ this.activeLesson = lessonId
 
     this.personalCodeService.get(this.activeLesson.id).subscribe({
       next: response => {
-        this.workspaceCode.setValue(response.code);
+        this.htmlCode.setValue(response.html ?? '');
+        this.cssCode.setValue(response.css ?? '');
+        this.javascriptCode.setValue(response.javascript ?? '');
+
         this.personalCodeSaved = response.saved;
         this.codeLoading = false;
       },
       error: () => {
-        this.workspaceCode.setValue(this.activeLesson?.example_code ?? '');
+        this.loadGuestCode();
         this.codeLoading = false;
       }
     });
@@ -116,16 +154,26 @@ this.activeLesson = lessonId
     if (!this.activeLesson) return;
 
     if (!this.auth.isLoggedIn()) {
-      this.errorMessage = 'A saját kód mentéséhez be kell jelentkezned.';
+      this.errorMessage =
+        'A saját kód mentéséhez be kell jelentkezned.';
       return;
     }
 
-    this.personalCodeService.save(this.activeLesson.id, this.workspaceCode.value).subscribe({
+    this.personalCodeService.save(
+      this.activeLesson.id,
+      this.htmlCode.value,
+      this.cssCode.value,
+      this.javascriptCode.value
+    ).subscribe({
       next: response => {
-        this.personalCodeSaved = true;
-        this.message = response.message ?? 'Saját kód elmentve.';
+        this.personalCodeSaved = response.saved;
+        this.message =
+          response.message ?? 'Saját kód elmentve.';
+        this.errorMessage = '';
       },
-      error: error => this.handleError(error)
+      error: error => {
+        this.handleError(error);
+      }
     });
   }
 
@@ -133,20 +181,32 @@ this.activeLesson = lessonId
     if (!this.activeLesson) return;
 
     if (!this.auth.isLoggedIn()) {
-      this.workspaceCode.setValue(this.activeLesson.example_code ?? '');
-      this.personalCodeSaved = false;
+      this.loadGuestCode();
       return;
     }
 
-    if (!confirm('Biztosan visszaállítod az eredeti kódot?')) return;
+    if (!confirm('Biztosan visszaállítod az eredeti kódot?')) {
+      return;
+    }
 
-    this.personalCodeService.reset(this.activeLesson.id).subscribe({
+    this.personalCodeService.reset(
+      this.activeLesson.id
+    ).subscribe({
       next: response => {
-        this.workspaceCode.setValue(response.code);
+        this.htmlCode.setValue(response.html ?? '');
+        this.cssCode.setValue(response.css ?? '');
+        this.javascriptCode.setValue(
+          response.javascript ?? ''
+        );
+
         this.personalCodeSaved = false;
-        this.message = response.message ?? 'Kód visszaállítva.';
+        this.message =
+          response.message ?? 'Kód visszaállítva.';
+        this.errorMessage = '';
       },
-      error: error => this.handleError(error)
+      error: error => {
+        this.handleError(error);
+      }
     });
   }
 
@@ -155,6 +215,9 @@ this.activeLesson = lessonId
       next: notes => {
         this.notes = notes;
         this.loadActiveNote();
+      },
+      error: error => {
+        this.handleError(error);
       }
     });
   }
@@ -162,18 +225,36 @@ this.activeLesson = lessonId
   loadActiveNote(): void {
     if (!this.activeLesson) return;
 
-    this.activeNote = this.notes.find(note => note.lesson_id === this.activeLesson!.id) ?? null;
-    this.note.setValue(this.activeNote?.content ?? '');
+    this.activeNote =
+      this.notes.find(
+        note => note.lesson_id === this.activeLesson!.id
+      ) ?? null;
+
+    this.note.setValue(
+      this.activeNote?.content ?? ''
+    );
   }
 
   saveNote(): void {
-    if (!this.activeLesson || !this.note.value.trim()) return;
+    if (
+      !this.activeLesson ||
+      !this.note.value.trim()
+    ) {
+      return;
+    }
 
-    this.noteService.save(this.activeLesson.id, this.note.value.trim()).subscribe({
+    this.noteService.save(
+      this.activeLesson.id,
+      this.note.value.trim()
+    ).subscribe({
       next: response => {
         this.message = response.message;
+        this.errorMessage = '';
 
-        const index = this.notes.findIndex(item => item.lesson_id === response.note.lesson_id);
+        const index = this.notes.findIndex(
+          item =>
+            item.lesson_id === response.note.lesson_id
+        );
 
         if (index >= 0) {
           this.notes[index] = response.note;
@@ -183,51 +264,94 @@ this.activeLesson = lessonId
 
         this.activeNote = response.note;
       },
-      error: error => this.handleError(error)
+      error: error => {
+        this.handleError(error);
+      }
     });
   }
 
   deleteNote(): void {
     if (!this.activeNote) return;
-    if (!confirm('Biztosan törlöd a jegyzetet?')) return;
+
+    if (!confirm('Biztosan törlöd a jegyzetet?')) {
+      return;
+    }
 
     const noteId = this.activeNote.id;
 
     this.noteService.delete(noteId).subscribe({
       next: response => {
-        this.notes = this.notes.filter(item => item.id !== noteId);
+        this.notes = this.notes.filter(
+          item => item.id !== noteId
+        );
+
         this.activeNote = null;
         this.note.setValue('');
         this.message = response.message;
+        this.errorMessage = '';
       },
-      error: error => this.handleError(error)
+      error: error => {
+        this.handleError(error);
+      }
     });
   }
 
   toggleFavorite(): void {
     if (!this.activeLesson) return;
 
-    this.favoriteService.toggle(this.activeLesson.id).subscribe({
-      next: response => this.message = response.message ?? 'Kedvencek frissítve.',
-      error: error => this.handleError(error)
+    this.favoriteService.toggle(
+      this.activeLesson.id
+    ).subscribe({
+      next: response => {
+        this.message =
+          response.message ?? 'Kedvencek frissítve.';
+        this.errorMessage = '';
+      },
+      error: error => {
+        this.handleError(error);
+      }
     });
   }
 
   completeLesson(): void {
     if (!this.activeLesson) return;
 
-    this.progressService.complete(this.activeLesson.id).subscribe({
-      next: response => this.message = response.message ?? 'Lecke teljesítve.',
-      error: error => this.handleError(error)
+    this.progressService.complete(
+      this.activeLesson.id
+    ).subscribe({
+      next: response => {
+        this.message =
+          response.message ?? 'Lecke teljesítve.';
+        this.errorMessage = '';
+      },
+      error: error => {
+        this.handleError(error);
+      }
     });
   }
 
   private handleError(error: any): void {
+    this.message = '';
+
     if (error.status === 401) {
-      this.errorMessage = 'Ehhez a funkcióhoz be kell jelentkezned.';
+      this.errorMessage =
+        'Ehhez a funkcióhoz be kell jelentkezned.';
       return;
     }
 
-    this.errorMessage = error.error?.message ?? 'Hiba történt.';
+    if (error.status === 419) {
+      this.errorMessage =
+        'A munkamenet lejárt. Frissítsd az oldalt és próbáld újra.';
+      return;
+    }
+
+    if (error.status === 422) {
+      this.errorMessage =
+        error.error?.message ?? 'Hibás adatok.';
+      return;
+    }
+
+    this.errorMessage =
+      error.error?.message ?? 'Hiba történt.';
   }
 }

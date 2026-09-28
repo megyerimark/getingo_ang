@@ -59,3 +59,35 @@
     flex-wrap: wrap;
   }
 }
+.runner {
+  margin-top: 20px;
+  overflow: hidden;
+  border: 1px solid #d5d5d5;
+  border-radius: 8px;
+}
+
+.runner-toolbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 15px;
+  background: #282a35;
+  color: #fff;
+}
+
+.runner-title {
+  font-weight: 600;
+}
+
+.runner-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.preview-frame {
+  display: block;
+  width: 100%;
+  min-height: 320px;
+  border: 0;
+  background: #fff;
+}
