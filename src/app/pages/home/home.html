@@ -1,0 +1,57 @@
+<section class="hero">
+  <div class="container text-center">
+    <h1>Tanulj programozást egyszerűen</h1>
+    <p>Ingyenes tananyagok, példák és gyakorlófeladatok egy helyen.</p>
+
+    <form class="search-box mx-auto" (ngSubmit)="searchContent()">
+      <input class="form-control form-control-lg" type="search" [formControl]="search" placeholder="Mire szeretnél rákeresni?">
+      <button class="btn btn-success btn-lg" type="submit">Keresés</button>
+    </form>
+  </div>
+</section>
+
+<section class="container py-5">
+  <div class="text-center mb-5">
+    <h2 class="fw-bold">Mit szeretnél tanulni?</h2>
+    <p class="text-secondary">Válassz egy témakört és kezdd el azonnal. Bejelentkezés nem szükséges.</p>
+  </div>
+
+  @if (loading) {
+    <div class="text-center">
+      <div class="spinner-border"></div>
+    </div>
+  } @else {
+    <div class="row g-4">
+      @for (category of categories; track category.id) {
+        <div class="col-sm-6 col-lg-4">
+          <a class="category-card" [routerLink]="['/categories', category.id, 'lessons']">
+            <h3>{{ category.name }}</h3>
+            <p>Tananyagok és példák</p>
+            <span>Tovább →</span>
+          </a>
+        </div>
+      }
+    </div>
+  }
+</section>
+
+<section class="features py-5">
+  <div class="container">
+    <div class="row g-4 text-center">
+      <div class="col-md-4">
+        <h4>Ingyenes tananyagok</h4>
+        <p>A leckék regisztráció nélkül is olvashatók.</p>
+      </div>
+
+      <div class="col-md-4">
+        <h4>Saját jegyzetek</h4>
+        <p>Jelentkezz be, és készíts saját jegyzeteket a leckékhez.</p>
+      </div>
+
+      <div class="col-md-4">
+        <h4>Haladás követése</h4>
+        <p>Belépés után XP-t gyűjthetsz és követheted a fejlődésed.</p>
+      </div>
+    </div>
+  </div>
+</section>

@@ -1,0 +1,39 @@
+<nav class="navbar navbar-expand-lg navbar-dark">
+  <div class="container">
+    <a class="navbar-brand fw-bold" routerLink="/">Getingo</a>
+
+    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#mainNavbar">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+
+    <div id="mainNavbar" class="collapse navbar-collapse">
+      <ul class="navbar-nav me-auto">
+        <li class="nav-item">
+          <a class="nav-link" routerLink="/" routerLinkActive="active" [routerLinkActiveOptions]="{exact:true}">Főoldal</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" routerLink="/categories" routerLinkActive="active">Tananyagok</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" routerLink="/search" routerLinkActive="active">Keresés</a>
+        </li>
+      </ul>
+
+      <div class="d-flex gap-2 align-items-center">
+        @if (auth.currentUser(); as user) {
+          <span class="text-light me-2">{{ user.name }}</span>
+
+          @if (user.role === 'admin') {
+            <a class="btn btn-warning btn-sm" routerLink="/admin">Admin</a>
+          }
+
+          <a class="btn btn-outline-light btn-sm" routerLink="/dashboard">Fiókom</a>
+          <button class="btn btn-danger btn-sm" type="button" (click)="logout()">Kilépés</button>
+        } @else {
+          <a class="btn btn-outline-light btn-sm" routerLink="/login">Belépés</a>
+          <a class="btn btn-success btn-sm" routerLink="/register">Regisztráció</a>
+        }
+      </div>
+    </div>
+  </div>
+</nav>
