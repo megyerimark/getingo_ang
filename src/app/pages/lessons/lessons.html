@@ -28,7 +28,7 @@
       }
 
       @if (activeLesson) {
-        <article>
+        <article class="lesson-article">
           <h1>{{ activeLesson.title }}</h1>
 
           <div class="lesson-text">
@@ -42,7 +42,6 @@
                   <h3>Eredeti példa</h3>
                   <span>Az admin által létrehozott kód</span>
                 </div>
-
                 <span class="badge text-bg-secondary">Csak olvasható</span>
               </div>
 
@@ -53,7 +52,7 @@
               <div class="section-heading">
                 <div>
                   <h3>Saját kódszerkesztő</h3>
-                  <span>Az eredeti kód saját másolata. Nyugodtan módosíthatod és futtathatod.</span>
+                  <span>Az eredeti kód saját másolata. Szabadon módosíthatod és futtathatod.</span>
                 </div>
 
                 @if (personalCodeSaved) {
@@ -72,7 +71,10 @@
 
                 <div class="d-flex flex-wrap gap-2 mt-3">
                   @if (auth.isLoggedIn()) {
-                    <button class="btn btn-primary" type="button" (click)="savePersonalCode()">
+                    <button
+                      class="btn btn-primary"
+                      type="button"
+                      (click)="savePersonalCode()">
                       Saját kód mentése
                     </button>
                   } @else {
@@ -81,46 +83,76 @@
                     </a>
                   }
 
-                  <button class="btn btn-outline-secondary" type="button" (click)="resetPersonalCode()">
+                  <button
+                    class="btn btn-outline-secondary"
+                    type="button"
+                    (click)="resetPersonalCode()">
                     Eredeti visszaállítása
                   </button>
                 </div>
 
-                <app-code-runner [code]="workspaceCode.value"></app-code-runner>
+                <app-code-runner
+                  [code]="workspaceCode.value">
+                </app-code-runner>
               }
             </section>
           }
 
+          <app-lesson-quiz
+            [lessonId]="activeLesson.id">
+          </app-lesson-quiz>
+
           @if (auth.isLoggedIn()) {
             <section class="student-tools">
               <div class="d-flex flex-wrap gap-2 mb-4">
-                <button class="btn btn-success" type="button" (click)="completeLesson()">
+                <button
+                  class="btn btn-success"
+                  type="button"
+                  (click)="completeLesson()">
                   ✓ Teljesítettem
                 </button>
 
-                <button class="btn btn-outline-warning" type="button" (click)="toggleFavorite()">
+                <button
+                  class="btn btn-outline-warning"
+                  type="button"
+                  (click)="toggleFavorite()">
                   ★ Kedvenc
                 </button>
               </div>
 
               <div class="note-box">
-                <h3>Saját jegyzet</h3>
+                <div class="section-heading">
+                  <div>
+                    <h3>Saját jegyzet</h3>
+                    <span>Ezt csak te látod.</span>
+                  </div>
+
+                  @if (activeNote) {
+                    <span class="badge text-bg-success">Mentve</span>
+                  }
+                </div>
 
                 <textarea
                   class="form-control"
-                  rows="5"
+                  rows="6"
                   [formControl]="note"
-                  placeholder="Írj jegyzetet ehhez a leckéhez...">
+                  placeholder="Írj saját jegyzetet ehhez a leckéhez...">
                 </textarea>
 
-                <div class="d-flex gap-2 mt-3">
-                  <button class="btn btn-primary" type="button" (click)="saveNote()">
+                <div class="d-flex flex-wrap gap-2 mt-3">
+                  <button
+                    class="btn btn-primary"
+                    type="button"
+                    (click)="saveNote()">
                     {{ activeNote ? 'Jegyzet frissítése' : 'Jegyzet mentése' }}
                   </button>
 
                   @if (activeNote) {
-                    <button class="btn btn-outline-danger" type="button" (click)="deleteNote()">
-                      Törlés
+                    <button
+                      class="btn btn-outline-danger"
+                      type="button"
+                      (click)="deleteNote()">
+                      Jegyzet törlése
                     </button>
                   }
                 </div>
@@ -128,15 +160,26 @@
             </section>
           } @else {
             <div class="login-notice">
-              <strong>A tananyag és a kódfuttató regisztráció nélkül használható.</strong>
-              <p class="mb-2">Saját kód mentéséhez, jegyzeteléshez és haladáskövetéshez jelentkezz be.</p>
-              <a class="btn btn-success me-2" routerLink="/login">Belépés</a>
-              <a class="btn btn-outline-success" routerLink="/register">Regisztráció</a>
+              <h4>Szeretnéd elmenteni a munkádat?</h4>
+              <p>
+                A tananyag, kódszerkesztő, kódfuttató és kvíz bejelentkezés nélkül is használható.
+                Saját kód mentéséhez, jegyzeteléshez, kedvencekhez és XP gyűjtéshez jelentkezz be.
+              </p>
+
+              <a class="btn btn-success me-2" routerLink="/login">
+                Belépés
+              </a>
+
+              <a class="btn btn-outline-success" routerLink="/register">
+                Regisztráció
+              </a>
             </div>
           }
         </article>
       } @else {
-        <div class="alert alert-info">Ebben a kategóriában még nincs tananyag.</div>
+        <div class="alert alert-info">
+          Ebben a kategóriában még nincs tananyag.
+        </div>
       }
     </main>
   </div>

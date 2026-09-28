@@ -4,11 +4,28 @@ import { Observable } from 'rxjs';
 import { environment } from '../../environments/environment';
 import { Lesson } from '../core/models/lesson.model';
 
-export interface SearchResult {
+export interface SearchExercise {
+  id: number;
+  category_id: number;
+  title: string;
+  description: string;
+  difficulty: string;
+}
+
+export interface SearchProject {
+  id: number;
+  title: string;
+  description: string;
+  difficulty: string;
+  estimated_time: number;
+}
+
+export interface SearchResponse {
+  query: string;
   results: {
     lessons: Lesson[];
-    exercises: any[];
-    projects: any[];
+    exercises: SearchExercise[];
+    projects: SearchProject[];
   };
 }
 
@@ -20,8 +37,8 @@ export class SearchService {
 
   constructor(private http: HttpClient) {}
 
-  search(query: string): Observable<SearchResult> {
+  search(query: string): Observable<SearchResponse> {
     const params = new HttpParams().set('q', query);
-    return this.http.get<SearchResult>(`${this.apiUrl}/search`, { params });
+    return this.http.get<SearchResponse>(`${this.apiUrl}/search`, { params });
   }
 }

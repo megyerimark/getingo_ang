@@ -9,10 +9,11 @@ import { ProgressService } from '../../services/progress';
 import { PersonalCodeService } from '../../services/personal-code';
 import { Auth } from '../../services/auth';
 import { CodeRunner } from '../../shared/code-runner/code-runner';
+import { LessonQuiz } from '../../shared/lesson-quiz/lesson-quiz';
 
 @Component({
   selector: 'app-lessons',
-  imports: [ReactiveFormsModule, RouterLink, CodeRunner],
+  imports: [ReactiveFormsModule, RouterLink, CodeRunner,LessonQuiz],
   templateUrl: './lessons.html',
   styleUrl: './lessons.scss'
 })
@@ -52,7 +53,11 @@ export class Lessons implements OnInit {
     this.lessonService.getByCategory(categoryId).subscribe({
       next: lessons => {
         this.lessons = lessons;
-        this.activeLesson = lessons[0] ?? null;
+        const lessonId = Number(this.route.snapshot.queryParamMap.get('lesson'));
+
+this.activeLesson = lessonId
+  ? lessons.find(lesson => lesson.id === lessonId) ?? lessons[0] ?? null
+  : lessons[0] ?? null;
         this.loading = false;
 
         if (this.auth.isLoggedIn()) {

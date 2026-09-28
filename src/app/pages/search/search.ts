@@ -1,7 +1,8 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnDestroy, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
-import { SearchService, SearchResult } from '../../services/search';
+import { Subject, takeUntil } from 'rxjs';
+import { SearchResponse, SearchService } from '../../services/search';
 
 @Component({
   selector: 'app-search',
@@ -9,11 +10,13 @@ import { SearchService, SearchResult } from '../../services/search';
   templateUrl: './search.html',
   styleUrl: './search.scss'
 })
-export class Search implements OnInit {
+export class Search implements OnInit, OnDestroy {
   query = new FormControl('', { nonNullable: true });
-  results: SearchResult['results'] | null = null;
+  results: SearchResponse['results'] | null = null;
   loading = false;
   errorMessage = '';
+
+  private destroy$ = new Subject<void>();
 
   constructor(
     private searchService: SearchService,
@@ -22,12 +25,16 @@ export class Search implements OnInit {
   ) {}
 
   ngOnInit(): void {
-    const query = this.route.snapshot.queryParamMap.get('q') ?? '';
+    this.route.queryParamMap
+      .pipe(takeUntil(this.destroy$))
+      .subscribe(params => {
+        const query = params.get('q')?.trim() ?? '';
 
-    if (query) {
-      this.query.setValue(query);
-      this.runSearch(query);
-    }
+        if (query.length >= 2) {
+          this.query.setValue(query, { emitEvent: false });
+          this.runSearch(query);
+        }
+      });
   }
 
   submit(): void {
@@ -38,12 +45,16 @@ export class Search implements OnInit {
       return;
     }
 
-    this.router.navigate([], {
-      queryParams: { q: query },
-      queryParamsHandling: 'merge'
+    this.router.navigate(['/search'], {
+      queryParams: { q: query }
     });
+  }
 
-    this.runSearch(query);
+  openLesson(categoryId: number, lessonId: number): void {
+    this.router.navigate(
+      ['/categories', categoryId, 'lessons'],
+      { queryParams: { lesson: lessonId } }
+    );
   }
 
   private runSearch(query: string): void {
@@ -59,8 +70,14 @@ export class Search implements OnInit {
         this.errorMessage = error.status === 429
           ? 'Túl sok keresés. Próbáld újra később.'
           : 'Nem sikerült a keresés.';
+
         this.loading = false;
       }
     });
+  }
+
+  ngOnDestroy(): void {
+    this.destroy$.next();
+    this.destroy$.complete();
   }
 }

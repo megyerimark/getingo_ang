@@ -1,53 +1,104 @@
 <div class="container py-5">
-  <h1 class="fw-bold mb-4">Keresés</h1>
+  <div class="search-header">
+    <h1>Keresés</h1>
+    <p>Keress a Getingo tananyagai, feladatai és projektjei között.</p>
+  </div>
 
-  <form class="search-form mb-5" (ngSubmit)="submit()">
-    <input class="form-control form-control-lg" type="search" [formControl]="query" placeholder="Keresés a tananyagok között...">
-    <button class="btn btn-success btn-lg" type="submit">Keresés</button>
-  </form>
+  <div class="search-form">
+    <input
+      class="form-control form-control-lg"
+      type="search"
+      [formControl]="query"
+      placeholder="Pl. HTML, JavaScript, változó, ciklus..."
+      (keydown.enter)="submit()"
+    >
+
+    <button
+      class="btn btn-success btn-lg"
+      type="button"
+      (click)="submit()">
+      Keresés
+    </button>
+  </div>
 
   @if (errorMessage) {
-    <div class="alert alert-danger">{{ errorMessage }}</div>
+    <div class="alert alert-danger mt-4">{{ errorMessage }}</div>
   }
 
   @if (loading) {
-    <div class="text-center">
+    <div class="text-center py-5">
       <div class="spinner-border"></div>
     </div>
   }
 
-  @if (results) {
-    <h3>Leckék</h3>
+  @if (!loading && results) {
+    <div class="results-summary">
+      {{ results.lessons.length + results.exercises.length + results.projects.length }} találat
+    </div>
 
-    @for (lesson of results.lessons; track lesson.id) {
-      <div class="result-card">
-        <h4>{{ lesson.title }}</h4>
-        <p>{{ lesson.content }}</p>
-      </div>
-    } @empty {
-      <p class="text-secondary">Nincs találat a leckék között.</p>
+    @if (results.lessons.length) {
+      <section class="result-section">
+        <h2>Tananyagok</h2>
+
+        @for (lesson of results.lessons; track lesson.id) {
+          <button
+            class="result-card"
+            type="button"
+            (click)="openLesson(lesson.category_id, lesson.id)">
+            <div>
+              <span class="result-type">Tananyag</span>
+              <h3>{{ lesson.title }}</h3>
+              <p>{{ lesson.content }}</p>
+            </div>
+
+            <span class="open-result">Megnyitás →</span>
+          </button>
+        }
+      </section>
     }
 
-    <h3 class="mt-5">Feladatok</h3>
+    @if (results.exercises.length) {
+      <section class="result-section">
+        <h2>Feladatok</h2>
 
-    @for (exercise of results.exercises; track exercise.id) {
-      <div class="result-card">
-        <h4>{{ exercise.title }}</h4>
-        <p>{{ exercise.description }}</p>
-      </div>
-    } @empty {
-      <p class="text-secondary">Nincs találat a feladatok között.</p>
+        @for (exercise of results.exercises; track exercise.id) {
+          <div class="result-card static">
+            <div>
+              <span class="result-type">Feladat</span>
+              <h3>{{ exercise.title }}</h3>
+              <p>{{ exercise.description }}</p>
+              <small>{{ exercise.difficulty }}</small>
+            </div>
+          </div>
+        }
+      </section>
     }
 
-    <h3 class="mt-5">Projektek</h3>
+    @if (results.projects.length) {
+      <section class="result-section">
+        <h2>Projektek</h2>
 
-    @for (project of results.projects; track project.id) {
-      <div class="result-card">
-        <h4>{{ project.title }}</h4>
-        <p>{{ project.description }}</p>
+        @for (project of results.projects; track project.id) {
+          <div class="result-card static">
+            <div>
+              <span class="result-type">Projekt</span>
+              <h3>{{ project.title }}</h3>
+              <p>{{ project.description }}</p>
+            </div>
+          </div>
+        }
+      </section>
+    }
+
+    @if (
+      !results.lessons.length &&
+      !results.exercises.length &&
+      !results.projects.length
+    ) {
+      <div class="no-results">
+        <h3>Nincs találat</h3>
+        <p>Próbálj másik keresőszót.</p>
       </div>
-    } @empty {
-      <p class="text-secondary">Nincs találat a projektek között.</p>
     }
   }
 </div>
