@@ -1,0 +1,25 @@
+:host {
+  display: block;
+}
+
+.register-card {
+  width: 100%;
+  max-width: 460px;
+
+  padding: 2rem;
+
+  background: #fff;
+
+  border-radius: 1rem;
+
+  box-shadow:
+    0 10px 40px rgba(0, 0, 0, 0.08);
+}
+
+.form-control {
+  min-height: 48px;
+}
+
+.btn {
+  min-height: 48px;
+}
