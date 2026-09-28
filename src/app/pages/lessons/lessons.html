@@ -1,1 +1,76 @@
-<p>lessons works!</p>
+@if (loading) {
+  <div class="text-center py-5">
+    <div class="spinner-border"></div>
+  </div>
+} @else {
+  <div class="lesson-layout">
+    <aside class="lesson-sidebar">
+      <div class="sidebar-header">Leckék</div>
+
+      @for (lesson of lessons; track lesson.id) {
+        <button
+          type="button"
+          class="lesson-link"
+          [class.active]="activeLesson?.id === lesson.id"
+          (click)="selectLesson(lesson)">
+          {{ lesson.title }}
+        </button>
+      }
+    </aside>
+
+    <main class="lesson-main">
+      @if (errorMessage) {
+        <div class="alert alert-danger">{{ errorMessage }}</div>
+      }
+
+      @if (message) {
+        <div class="alert alert-success">{{ message }}</div>
+      }
+
+      @if (activeLesson) {
+        <article>
+          <h1>{{ activeLesson.title }}</h1>
+
+          <div class="lesson-content">{{ activeLesson.content }}</div>
+
+          @if (activeLesson.example_code) {
+            <div class="code-section">
+              <div class="code-title">Példa</div>
+              <pre><code>{{ activeLesson.example_code }}</code></pre>
+            </div>
+          }
+        </article>
+
+        <hr class="my-5">
+
+        @if (auth.isLoggedIn()) {
+          <div class="user-actions">
+            <div class="d-flex flex-wrap gap-2 mb-4">
+              <button class="btn btn-success" type="button" (click)="completeLesson()">✓ Teljesítettem</button>
+              <button class="btn btn-outline-warning" type="button" (click)="toggleFavorite()">★ Kedvencek</button>
+            </div>
+
+            <div class="note-box">
+              <h4>Saját jegyzet</h4>
+              <textarea
+                class="form-control"
+                rows="6"
+                [formControl]="note"
+                placeholder="Írj saját jegyzetet ehhez a leckéhez..."></textarea>
+              <button class="btn btn-primary mt-3" type="button" (click)="saveNote()">Jegyzet mentése</button>
+            </div>
+          </div>
+        } @else {
+          <div class="login-box">
+            <h4>Szeretnél jegyzetelni és követni a haladásodat?</h4>
+            <p>A tananyag ingyenes és regisztráció nélkül olvasható. Fiókkal jegyzeteket készíthetsz, kedvenceket menthetsz és XP-t gyűjthetsz.</p>
+            <a class="btn btn-success me-2" routerLink="/login">Belépés</a>
+            <a class="btn btn-outline-success" routerLink="/register">Regisztráció</a>
+          </div>
+        }
+      } @else {
+        <div class="alert alert-info">Ebben a kategóriában még nincs lecke.</div>
+      }
+    </main>
+  </div>
+}

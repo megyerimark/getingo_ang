@@ -1,1 +1,30 @@
-<p>categories works!</p>
+<div class="container py-5">
+  <div class="mb-5">
+    <h1 class="fw-bold">Tananyagok</h1>
+    <p class="text-secondary">Válassz egy témakört. A tananyagok regisztráció nélkül is elérhetők.</p>
+  </div>
+
+  @if (loading) {
+    <div class="text-center">
+      <div class="spinner-border"></div>
+    </div>
+  }
+
+  @if (errorMessage) {
+    <div class="alert alert-danger">{{ errorMessage }}</div>
+  }
+
+  @if (!loading) {
+    <div class="row g-4">
+      @for (category of categories; track category.id) {
+        <div class="col-md-6 col-lg-4">
+          <a class="category-card" [routerLink]="['/categories', category.id, 'lessons']">
+            <h3>{{ category.name }}</h3>
+            <p>Leckék, példák és gyakorlási lehetőségek.</p>
+            <span>Tananyag megnyitása →</span>
+          </a>
+        </div>
+      }
+    </div>
+  }
+</div>

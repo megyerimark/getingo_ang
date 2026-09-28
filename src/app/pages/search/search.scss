@@ -1,0 +1,38 @@
+.search-form {
+  display: flex;
+  max-width: 750px;
+}
+
+.search-form input {
+  border-radius: 8px 0 0 8px;
+}
+
+.search-form button {
+  border-radius: 0 8px 8px 0;
+}
+
+.result-card {
+  padding: 20px;
+  margin-bottom: 15px;
+  border: 1px solid #e5e5e5;
+  border-radius: 10px;
+  background: #fff;
+}
+
+.result-card p {
+  margin: 0;
+  color: #6c757d;
+  white-space: pre-line;
+}
+
+@media (max-width: 576px) {
+  .search-form {
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .search-form input,
+  .search-form button {
+    border-radius: 8px;
+  }
+}
