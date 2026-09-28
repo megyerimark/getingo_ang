@@ -61,6 +61,9 @@ export class AdminLessons implements OnInit {
     this.categoryService.getAll().subscribe({
       next: categories => {
         this.categories = categories;
+      },
+      error: () => {
+        this.errorMessage = 'Nem sikerült betölteni a kategóriákat.';
       }
     });
   }
@@ -118,23 +121,19 @@ export class AdminLessons implements OnInit {
     this.errorMessage = '';
 
     const request = this.editingLesson
-      ? this.adminService.updateLesson(
-          this.editingLesson.id,
-          data
-        )
+      ? this.adminService.updateLesson(this.editingLesson.id, data)
       : this.adminService.createLesson(data);
 
     request.subscribe({
       next: response => {
-        this.message =
-          response.message ?? 'Tananyag elmentve.';
+        this.message = response.message ?? 'Tananyag elmentve.';
         this.saving = false;
         this.resetForm();
         this.loadLessons();
       },
       error: error => {
         this.errorMessage =
-          error.error?.message ?? 'Nem sikerült menteni.';
+          error.error?.message ?? 'Nem sikerült menteni a tananyagot.';
         this.saving = false;
       }
     });
@@ -169,18 +168,13 @@ export class AdminLessons implements OnInit {
   }
 
   deleteLesson(lesson: AdminLesson): void {
-    if (
-      !confirm(
-        `Biztosan törlöd ezt a leckét: ${lesson.title}?`
-      )
-    ) {
+    if (!confirm(`Biztosan törlöd ezt a leckét: ${lesson.title}?`)) {
       return;
     }
 
     this.adminService.deleteLesson(lesson.id).subscribe({
       next: response => {
-        this.message =
-          response.message ?? 'Lecke törölve.';
+        this.message = response.message ?? 'Lecke törölve.';
 
         this.lessons = this.lessons.filter(
           item => item.id !== lesson.id
@@ -196,6 +190,12 @@ export class AdminLessons implements OnInit {
           'Nem sikerült törölni a leckét.';
       }
     });
+  }
+
+  getCategoryName(categoryId: number): string {
+    return this.categories.find(
+      category => category.id === categoryId
+    )?.name ?? 'Ismeretlen kategória';
   }
 
   private resetForm(): void {

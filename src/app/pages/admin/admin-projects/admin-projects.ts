@@ -6,18 +6,17 @@ import { AdminService } from '../../../services/admin';
 @Component({
   selector: 'app-admin-projects',
   imports: [ReactiveFormsModule],
-  templateUrl: './admin-projects.html',
-  styleUrl: './admin-projects.scss'
+  templateUrl: './admin-projects.html'
 })
 export class AdminProjects implements OnInit {
   projects: AdminProject[] = [];
-  editingId: number | null = null;
+  editing: AdminProject | null = null;
 
   form = new FormGroup({
     title: new FormControl('', { nonNullable: true, validators: Validators.required }),
     description: new FormControl('', { nonNullable: true, validators: Validators.required }),
-    difficulty: new FormControl('', { nonNullable: true, validators: Validators.required }),
-    estimated_time: new FormControl<number>(60, { nonNullable: true, validators: Validators.required }),
+    difficulty: new FormControl('kezdő', { nonNullable: true }),
+    estimated_time: new FormControl(30, { nonNullable: true }),
     solution: new FormControl('', { nonNullable: true })
   });
 
@@ -28,38 +27,50 @@ export class AdminProjects implements OnInit {
   }
 
   load(): void {
-    this.adminService.getProjects().subscribe(projects => this.projects = projects);
-  }
-
-  edit(project: AdminProject): void {
-    this.editingId = project.id;
-    this.form.patchValue({ ...project, solution: project.solution ?? '' });
-  }
-
-  cancel(): void {
-    this.editingId = null;
-    this.form.reset({ estimated_time: 60 });
+    this.adminService.getProjects().subscribe(p => this.projects = p);
   }
 
   save(): void {
     if (this.form.invalid) return;
 
-    const value = this.form.getRawValue();
-    const data = { ...value, solution: value.solution || null };
+    const data = this.form.getRawValue();
 
-    const request = this.editingId
-      ? this.adminService.updateProject(this.editingId, data)
+    const request = this.editing
+      ? this.adminService.updateProject(this.editing.id, data)
       : this.adminService.createProject(data);
 
     request.subscribe(() => {
-      this.cancel();
+      this.reset();
       this.load();
     });
   }
 
-  delete(id: number): void {
-    if (!confirm('Biztosan törlöd?')) return;
+  edit(project: AdminProject): void {
+    this.editing = project;
 
+    this.form.setValue({
+      title: project.title,
+      description: project.description,
+      difficulty: project.difficulty,
+      estimated_time: project.estimated_time,
+      solution: project.solution ?? ''
+    });
+  }
+
+  remove(id: number): void {
+    if (!confirm('Biztosan törlöd a projektet?')) return;
     this.adminService.deleteProject(id).subscribe(() => this.load());
+  }
+
+  reset(): void {
+    this.editing = null;
+
+    this.form.reset({
+      title: '',
+      description: '',
+      difficulty: 'kezdő',
+      estimated_time: 30,
+      solution: ''
+    });
   }
 }

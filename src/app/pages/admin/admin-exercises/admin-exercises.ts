@@ -1,76 +1,81 @@
 import { Component, OnInit } from '@angular/core';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
-import { AdminExercise } from '../../../core/models/admin.model';
 import { Category } from '../../../core/models/category.model';
+import { AdminExercise } from '../../../core/models/admin.model';
 import { AdminService } from '../../../services/admin';
-import { CategoryService } from '../../../services/category';
 
 @Component({
   selector: 'app-admin-exercises',
   imports: [ReactiveFormsModule],
-  templateUrl: './admin-exercises.html',
-  styleUrl: './admin-exercises.scss'
+  templateUrl: './admin-exercises.html'
 })
 export class AdminExercises implements OnInit {
   exercises: AdminExercise[] = [];
   categories: Category[] = [];
-  editingId: number | null = null;
+  editing: AdminExercise | null = null;
 
   form = new FormGroup({
     category_id: new FormControl<number | null>(null, Validators.required),
     title: new FormControl('', { nonNullable: true, validators: Validators.required }),
     description: new FormControl('', { nonNullable: true, validators: Validators.required }),
-    difficulty: new FormControl('', { nonNullable: true, validators: Validators.required }),
-    solution: new FormControl<string | null>(null)
+    difficulty: new FormControl('kezdő', { nonNullable: true }),
+    solution: new FormControl('', { nonNullable: true })
   });
 
-  constructor(private adminService: AdminService, private categoryService: CategoryService) {}
+  constructor(private adminService: AdminService) {}
 
   ngOnInit(): void {
     this.load();
-    this.categoryService.getAll().subscribe(categories => this.categories = categories);
+    this.adminService.getCategories().subscribe(c => this.categories = c);
   }
 
   load(): void {
-    this.adminService.getExercises().subscribe(exercises => this.exercises = exercises);
-  }
-
-  edit(exercise: AdminExercise): void {
-    this.editingId = exercise.id;
-    this.form.patchValue(exercise);
-  }
-
-  cancel(): void {
-    this.editingId = null;
-    this.form.reset();
+    this.adminService.getExercises().subscribe(e => this.exercises = e);
   }
 
   save(): void {
     if (this.form.invalid) return;
 
-    const value = this.form.getRawValue();
+    const data = this.form.getRawValue();
 
-    const data = {
-      category_id: Number(value.category_id),
-      title: value.title,
-      description: value.description,
-      difficulty: value.difficulty,
-      solution: value.solution || null
-    };
+    if (!data.category_id) return;
 
-    const request = this.editingId
-      ? this.adminService.updateExercise(this.editingId, data)
-      : this.adminService.createExercise(data);
+    const request = this.editing
+      ? this.adminService.updateExercise(this.editing.id, data as any)
+      : this.adminService.createExercise(data as any);
 
     request.subscribe(() => {
-      this.cancel();
+      this.reset();
       this.load();
     });
   }
 
-  delete(id: number): void {
-    if (!confirm('Biztosan törlöd?')) return;
+  edit(exercise: AdminExercise): void {
+    this.editing = exercise;
 
+    this.form.setValue({
+      category_id: exercise.category_id,
+      title: exercise.title,
+      description: exercise.description,
+      difficulty: exercise.difficulty,
+      solution: exercise.solution ?? ''
+    });
+  }
+
+  remove(id: number): void {
+    if (!confirm('Biztosan törlöd?')) return;
     this.adminService.deleteExercise(id).subscribe(() => this.load());
+  }
+
+  reset(): void {
+    this.editing = null;
+
+    this.form.reset({
+      category_id: null,
+      title: '',
+      description: '',
+      difficulty: 'kezdő',
+      solution: ''
+    });
   }
 }

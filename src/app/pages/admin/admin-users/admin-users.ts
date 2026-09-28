@@ -5,13 +5,11 @@ import { AdminService } from '../../../services/admin';
 @Component({
   selector: 'app-admin-users',
   imports: [],
-  templateUrl: './admin-users.html',
-  styleUrl: './admin-users.scss'
+  templateUrl: './admin-users.html'
 })
 export class AdminUsers implements OnInit {
   users: AdminUser[] = [];
-  message = '';
-  errorMessage = '';
+  loading = true;
 
   constructor(private adminService: AdminService) {}
 
@@ -20,31 +18,33 @@ export class AdminUsers implements OnInit {
   }
 
   load(): void {
-    this.adminService.getUsers().subscribe({
-      next: users => this.users = users,
-      error: () => this.errorMessage = 'Nem sikerült betölteni a felhasználókat.'
+    this.adminService.getUsers().subscribe(users => {
+      this.users = users;
+      this.loading = false;
     });
   }
 
-  changeRole(user: AdminUser): void {
-    const role = user.role === 'admin' ? 'student' : 'admin';
-
-    this.adminService.updateUserRole(user.id, role).subscribe({
-      next: () => {
-        this.message = 'Szerepkör módosítva.';
-        this.load();
-      },
-      error: error => this.errorMessage = error.error?.message ?? 'Nem sikerült módosítani.'
+  changeRole(user: AdminUser, role: 'student' | 'admin'): void {
+    this.adminService.updateUserRole(user.id, role).subscribe(() => {
+      user.role = role;
     });
   }
 
   toggleBan(user: AdminUser): void {
-    this.adminService.toggleBan(user.id).subscribe({
-      next: response => {
-        this.message = response.message;
-        this.load();
-      },
-      error: error => this.errorMessage = error.error?.message ?? 'Nem sikerült módosítani.'
+    this.adminService.toggleBan(user.id).subscribe(response => {
+      user.is_banned = response.is_banned;
     });
+  }
+
+  get students(): number {
+    return this.users.filter(user => user.role === 'student').length;
+  }
+
+  get admins(): number {
+    return this.users.filter(user => user.role === 'admin').length;
+  }
+
+  get banned(): number {
+    return this.users.filter(user => user.is_banned).length;
   }
 }

@@ -39,47 +39,58 @@ export const routes: Routes = [
   },
   {
   path: 'admin',
-  canActivate: [authGuard, adminGuard],
-  loadComponent: () => import('./pages/admin/admin').then(m => m.Admin),
+  canActivate: [adminGuard],
+  loadComponent: () =>
+    import('./pages/admin/admin-layout/admin-layout')
+      .then(m => m.AdminLayout),
   children: [
     {
       path: '',
-      redirectTo: 'dashboard',
-      pathMatch: 'full'
+      loadComponent: () =>
+        import('./pages/admin/admin')
+          .then(m => m.Admin)
     },
     {
-    path: 'categories',
-    loadComponent: () =>
-    import('./pages/admin/admin-categories/admin-categories')
-    .then(m => m.AdminCategories)
-},
-    {
-      path: 'dashboard',
-      loadComponent: () => import('./pages/admin/admin-dashboard/admin-dashboard').then(m => m.AdminDashboard)
-    },
-    {
-      path: 'users',
-      loadComponent: () => import('./pages/admin/admin-users/admin-users').then(m => m.AdminUsers)
+      path: 'categories',
+      loadComponent: () =>
+        import('./pages/admin/admin-categories/admin-categories')
+          .then(m => m.AdminCategories)
     },
     {
       path: 'lessons',
-      loadComponent: () => import('./pages/admin/admin-lessons/admin-lessons').then(m => m.AdminLessons)
-    },
-    {
-      path: 'exercises',
-      loadComponent: () => import('./pages/admin/admin-exercises/admin-exercises').then(m => m.AdminExercises)
-    },
-    {
-      path: 'projects',
-      loadComponent: () => import('./pages/admin/admin-projects/admin-projects').then(m => m.AdminProjects)
+      loadComponent: () =>
+        import('./pages/admin/admin-lessons/admin-lessons')
+          .then(m => m.AdminLessons)
     },
     {
       path: 'quizzes',
-      loadComponent: () => import('./pages/admin/admin-quizzes/admin-quizzes').then(m => m.AdminQuizzes)
+      loadComponent: () =>
+        import('./pages/admin/admin-quizzes/admin-quizzes')
+          .then(m => m.AdminQuizzes)
+    },
+    {
+      path: 'exercises',
+      loadComponent: () =>
+        import('./pages/admin/admin-exercises/admin-exercises')
+          .then(m => m.AdminExercises)
+    },
+    {
+      path: 'projects',
+      loadComponent: () =>
+        import('./pages/admin/admin-projects/admin-projects')
+          .then(m => m.AdminProjects)
+    },
+    {
+      path: 'users',
+      loadComponent: () =>
+        import('./pages/admin/admin-users/admin-users')
+          .then(m => m.AdminUsers)
     },
     {
       path: 'audit-logs',
-      loadComponent: () => import('./pages/admin/admin-audit-logs/admin-audit-logs').then(m => m.AdminAuditLogs)
+      loadComponent: () =>
+        import('./pages/admin/admin-audit-logs/admin-audit-logs')
+          .then(m => m.AdminAuditLogs)
     }
   ]
 },

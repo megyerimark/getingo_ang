@@ -40,10 +40,19 @@ export class AdminQuizzes implements OnInit {
     this.form.patchValue(quiz);
   }
 
-  cancel(): void {
-    this.editingId = null;
-    this.form.reset({ correct_answer: 'a' });
-  }
+ cancel(): void {
+  this.editingId = null;
+
+  this.form.reset({
+    lesson_id: null,
+    question: '',
+    option_a: '',
+    option_b: '',
+    option_c: '',
+    option_d: '',
+    correct_answer: 'a'
+  });
+}
 
   save(): void {
     if (this.form.invalid) return;

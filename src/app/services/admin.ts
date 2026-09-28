@@ -26,11 +26,13 @@ export class AdminService {
   }
 
   getStats(): Observable<AdminStats> {
-    return this.http.get<AdminStats>(`${this.apiUrl}/dashboard-stats`);
-  }
+  return this.http.get<AdminStats>(`${this.apiUrl}/dashboard`);
+}
 
   getUsers(): Observable<AdminUser[]> {
-    return this.http.get<any>(`${this.apiUrl}/users`).pipe(map(response => this.unwrap<AdminUser>(response)));
+    return this.http.get<any>(`${this.apiUrl}/users`).pipe(
+      map(response => this.unwrap<AdminUser>(response))
+    );
   }
 
   updateUserRole(id: number, role: 'student' | 'admin'): Observable<any> {
@@ -41,15 +43,43 @@ export class AdminService {
     return this.http.post(`${this.apiUrl}/users/${id}/toggle-ban`, {});
   }
 
+  getCategories(): Observable<Category[]> {
+    return this.http.get<any>(`${this.apiUrl}/categories`).pipe(
+      map(response => this.unwrap<Category>(response))
+    );
+  }
+
+  createCategory(
+    data: Omit<Category, 'id' | 'lessons_count' | 'exercises_count'>
+  ): Observable<any> {
+    return this.http.post(`${this.apiUrl}/categories`, data);
+  }
+
+  updateCategory(
+    id: number,
+    data: Omit<Category, 'id' | 'lessons_count' | 'exercises_count'>
+  ): Observable<any> {
+    return this.http.put(`${this.apiUrl}/categories/${id}`, data);
+  }
+
+  deleteCategory(id: number): Observable<any> {
+    return this.http.delete(`${this.apiUrl}/categories/${id}`);
+  }
+
   getLessons(): Observable<AdminLesson[]> {
-    return this.http.get<any>(`${this.apiUrl}/lessons`).pipe(map(response => this.unwrap<AdminLesson>(response)));
+    return this.http.get<any>(`${this.apiUrl}/lessons`).pipe(
+      map(response => this.unwrap<AdminLesson>(response))
+    );
   }
 
   createLesson(data: Omit<AdminLesson, 'id'>): Observable<any> {
     return this.http.post(`${this.apiUrl}/lessons`, data);
   }
 
-  updateLesson(id: number, data: Omit<AdminLesson, 'id'>): Observable<any> {
+  updateLesson(
+    id: number,
+    data: Omit<AdminLesson, 'id'>
+  ): Observable<any> {
     return this.http.put(`${this.apiUrl}/lessons/${id}`, data);
   }
 
@@ -58,14 +88,19 @@ export class AdminService {
   }
 
   getExercises(): Observable<AdminExercise[]> {
-    return this.http.get<any>(`${this.apiUrl}/exercises`).pipe(map(response => this.unwrap<AdminExercise>(response)));
+    return this.http.get<any>(`${this.apiUrl}/exercises`).pipe(
+      map(response => this.unwrap<AdminExercise>(response))
+    );
   }
 
   createExercise(data: Omit<AdminExercise, 'id'>): Observable<any> {
     return this.http.post(`${this.apiUrl}/exercises`, data);
   }
 
-  updateExercise(id: number, data: Omit<AdminExercise, 'id'>): Observable<any> {
+  updateExercise(
+    id: number,
+    data: Omit<AdminExercise, 'id'>
+  ): Observable<any> {
     return this.http.put(`${this.apiUrl}/exercises/${id}`, data);
   }
 
@@ -74,14 +109,19 @@ export class AdminService {
   }
 
   getProjects(): Observable<AdminProject[]> {
-    return this.http.get<any>(`${this.apiUrl}/projects`).pipe(map(response => this.unwrap<AdminProject>(response)));
+    return this.http.get<any>(`${this.apiUrl}/projects`).pipe(
+      map(response => this.unwrap<AdminProject>(response))
+    );
   }
 
   createProject(data: Omit<AdminProject, 'id'>): Observable<any> {
     return this.http.post(`${this.apiUrl}/projects`, data);
   }
 
-  updateProject(id: number, data: Omit<AdminProject, 'id'>): Observable<any> {
+  updateProject(
+    id: number,
+    data: Omit<AdminProject, 'id'>
+  ): Observable<any> {
     return this.http.put(`${this.apiUrl}/projects/${id}`, data);
   }
 
@@ -90,14 +130,19 @@ export class AdminService {
   }
 
   getQuizzes(): Observable<AdminQuiz[]> {
-    return this.http.get<any>(`${this.apiUrl}/quizzes`).pipe(map(response => this.unwrap<AdminQuiz>(response)));
+    return this.http.get<any>(`${this.apiUrl}/quizzes`).pipe(
+      map(response => this.unwrap<AdminQuiz>(response))
+    );
   }
 
   createQuiz(data: Omit<AdminQuiz, 'id'>): Observable<any> {
     return this.http.post(`${this.apiUrl}/quizzes`, data);
   }
 
-  updateQuiz(id: number, data: Omit<AdminQuiz, 'id'>): Observable<any> {
+  updateQuiz(
+    id: number,
+    data: Omit<AdminQuiz, 'id'>
+  ): Observable<any> {
     return this.http.put(`${this.apiUrl}/quizzes/${id}`, data);
   }
 
@@ -106,24 +151,8 @@ export class AdminService {
   }
 
   getAuditLogs(): Observable<AuditLog[]> {
-    return this.http.get<any>(`${this.apiUrl}/audit-logs`).pipe(map(response => this.unwrap<AuditLog>(response)));
+    return this.http.get<any>(`${this.apiUrl}/audit-logs`).pipe(
+      map(response => this.unwrap<AuditLog>(response))
+    );
   }
-  getCategories(): Observable<Category[]> {
-  return this.http.get<any>(`${this.apiUrl}/categories`).pipe(
-    map(response => this.unwrap<Category>(response))
-  );
-}
-
-createCategory(data: Omit<Category, 'id' | 'lessons_count' | 'exercises_count'>): Observable<any> {
-  return this.http.post(`${this.apiUrl}/categories`, data);
-}
-
-updateCategory(id: number, data: Omit<Category, 'id' | 'lessons_count' | 'exercises_count'>): Observable<any> {
-  return this.http.put(`${this.apiUrl}/categories/${id}`, data);
-}
-
-deleteCategory(id: number): Observable<any> {
-  return this.http.delete(`${this.apiUrl}/categories/${id}`);
-}
-
 }
