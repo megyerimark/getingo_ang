@@ -5,12 +5,12 @@
 } @else {
   <div class="lesson-layout">
     <aside class="lesson-sidebar">
-      <div class="sidebar-header">Leckék</div>
+      <div class="sidebar-title">Tananyag</div>
 
       @for (lesson of lessons; track lesson.id) {
         <button
-          type="button"
           class="lesson-link"
+          type="button"
           [class.active]="activeLesson?.id === lesson.id"
           (click)="selectLesson(lesson)">
           {{ lesson.title }}
@@ -19,57 +19,124 @@
     </aside>
 
     <main class="lesson-main">
-      @if (errorMessage) {
-        <div class="alert alert-danger">{{ errorMessage }}</div>
-      }
-
       @if (message) {
         <div class="alert alert-success">{{ message }}</div>
+      }
+
+      @if (errorMessage) {
+        <div class="alert alert-danger">{{ errorMessage }}</div>
       }
 
       @if (activeLesson) {
         <article>
           <h1>{{ activeLesson.title }}</h1>
 
-          <div class="lesson-content">{{ activeLesson.content }}</div>
+          <div class="lesson-text">
+            {{ activeLesson.content }}
+          </div>
 
           @if (activeLesson.example_code) {
-            <div class="code-section">
-              <div class="code-title">Példa</div>
-              <pre><code>{{ activeLesson.example_code }}</code></pre>
+            <section class="original-code-section">
+              <div class="section-heading">
+                <div>
+                  <h3>Eredeti példa</h3>
+                  <span>Az admin által létrehozott kód</span>
+                </div>
+
+                <span class="badge text-bg-secondary">Csak olvasható</span>
+              </div>
+
+              <pre class="original-code"><code>{{ activeLesson.example_code }}</code></pre>
+            </section>
+
+            <section class="workspace-section">
+              <div class="section-heading">
+                <div>
+                  <h3>Saját kódszerkesztő</h3>
+                  <span>Az eredeti kód saját másolata. Nyugodtan módosíthatod és futtathatod.</span>
+                </div>
+
+                @if (personalCodeSaved) {
+                  <span class="badge text-bg-success">Mentve</span>
+                }
+              </div>
+
+              @if (codeLoading) {
+                <div class="spinner-border spinner-border-sm"></div>
+              } @else {
+                <textarea
+                  class="code-editor"
+                  spellcheck="false"
+                  [formControl]="workspaceCode">
+                </textarea>
+
+                <div class="d-flex flex-wrap gap-2 mt-3">
+                  @if (auth.isLoggedIn()) {
+                    <button class="btn btn-primary" type="button" (click)="savePersonalCode()">
+                      Saját kód mentése
+                    </button>
+                  } @else {
+                    <a class="btn btn-primary" routerLink="/login">
+                      Belépés a mentéshez
+                    </a>
+                  }
+
+                  <button class="btn btn-outline-secondary" type="button" (click)="resetPersonalCode()">
+                    Eredeti visszaállítása
+                  </button>
+                </div>
+
+                <app-code-runner [code]="workspaceCode.value"></app-code-runner>
+              }
+            </section>
+          }
+
+          @if (auth.isLoggedIn()) {
+            <section class="student-tools">
+              <div class="d-flex flex-wrap gap-2 mb-4">
+                <button class="btn btn-success" type="button" (click)="completeLesson()">
+                  ✓ Teljesítettem
+                </button>
+
+                <button class="btn btn-outline-warning" type="button" (click)="toggleFavorite()">
+                  ★ Kedvenc
+                </button>
+              </div>
+
+              <div class="note-box">
+                <h3>Saját jegyzet</h3>
+
+                <textarea
+                  class="form-control"
+                  rows="5"
+                  [formControl]="note"
+                  placeholder="Írj jegyzetet ehhez a leckéhez...">
+                </textarea>
+
+                <div class="d-flex gap-2 mt-3">
+                  <button class="btn btn-primary" type="button" (click)="saveNote()">
+                    {{ activeNote ? 'Jegyzet frissítése' : 'Jegyzet mentése' }}
+                  </button>
+
+                  @if (activeNote) {
+                    <button class="btn btn-outline-danger" type="button" (click)="deleteNote()">
+                      Törlés
+                    </button>
+                  }
+                </div>
+              </div>
+            </section>
+          } @else {
+            <div class="login-notice">
+              <strong>A tananyag és a kódfuttató regisztráció nélkül használható.</strong>
+              <p class="mb-2">Saját kód mentéséhez, jegyzeteléshez és haladáskövetéshez jelentkezz be.</p>
+              <a class="btn btn-success me-2" routerLink="/login">Belépés</a>
+              <a class="btn btn-outline-success" routerLink="/register">Regisztráció</a>
             </div>
           }
         </article>
-
-        <hr class="my-5">
-
-        @if (auth.isLoggedIn()) {
-          <div class="user-actions">
-            <div class="d-flex flex-wrap gap-2 mb-4">
-              <button class="btn btn-success" type="button" (click)="completeLesson()">✓ Teljesítettem</button>
-              <button class="btn btn-outline-warning" type="button" (click)="toggleFavorite()">★ Kedvencek</button>
-            </div>
-
-            <div class="note-box">
-              <h4>Saját jegyzet</h4>
-              <textarea
-                class="form-control"
-                rows="6"
-                [formControl]="note"
-                placeholder="Írj saját jegyzetet ehhez a leckéhez..."></textarea>
-              <button class="btn btn-primary mt-3" type="button" (click)="saveNote()">Jegyzet mentése</button>
-            </div>
-          </div>
-        } @else {
-          <div class="login-box">
-            <h4>Szeretnél jegyzetelni és követni a haladásodat?</h4>
-            <p>A tananyag ingyenes és regisztráció nélkül olvasható. Fiókkal jegyzeteket készíthetsz, kedvenceket menthetsz és XP-t gyűjthetsz.</p>
-            <a class="btn btn-success me-2" routerLink="/login">Belépés</a>
-            <a class="btn btn-outline-success" routerLink="/register">Regisztráció</a>
-          </div>
-        }
       } @else {
-        <div class="alert alert-info">Ebben a kategóriában még nincs lecke.</div>
+        <div class="alert alert-info">Ebben a kategóriában még nincs tananyag.</div>
       }
     </main>
   </div>

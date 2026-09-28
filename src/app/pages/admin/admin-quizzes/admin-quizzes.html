@@ -1,1 +1,60 @@
-<p>admin-quizzes works!</p>
+<h1 class="mb-4">Kvízek</h1>
+
+<div class="card mb-4">
+  <div class="card-body">
+    <form [formGroup]="form" (ngSubmit)="save()">
+      <div class="mb-3">
+        <select class="form-select" formControlName="lesson_id">
+          <option [ngValue]="null">Válassz leckét</option>
+          @for (lesson of lessons; track lesson.id) {
+            <option [ngValue]="lesson.id">{{ lesson.title }}</option>
+          }
+        </select>
+      </div>
+
+      <input class="form-control mb-3" formControlName="question" placeholder="Kérdés">
+      <input class="form-control mb-2" formControlName="option_a" placeholder="A válasz">
+      <input class="form-control mb-2" formControlName="option_b" placeholder="B válasz">
+      <input class="form-control mb-2" formControlName="option_c" placeholder="C válasz">
+      <input class="form-control mb-3" formControlName="option_d" placeholder="D válasz">
+
+      <select class="form-select" formControlName="correct_answer">
+        <option value="a">A helyes</option>
+        <option value="b">B helyes</option>
+        <option value="c">C helyes</option>
+        <option value="d">D helyes</option>
+      </select>
+
+      <button class="btn btn-success mt-3">{{ editingId ? 'Mentés' : 'Létrehozás' }}</button>
+
+      @if (editingId) {
+        <button class="btn btn-secondary mt-3 ms-2" type="button" (click)="cancel()">Mégse</button>
+      }
+    </form>
+  </div>
+</div>
+
+<table class="table table-hover bg-white">
+  <thead>
+    <tr>
+      <th>Kérdés</th>
+      <th>Lecke ID</th>
+      <th>Helyes</th>
+      <th>Művelet</th>
+    </tr>
+  </thead>
+
+  <tbody>
+    @for (quiz of quizzes; track quiz.id) {
+      <tr>
+        <td>{{ quiz.question }}</td>
+        <td>{{ quiz.lesson_id }}</td>
+        <td>{{ quiz.correct_answer.toUpperCase() }}</td>
+        <td>
+          <button class="btn btn-sm btn-primary me-2" (click)="edit(quiz)">Szerkesztés</button>
+          <button class="btn btn-sm btn-danger" (click)="delete(quiz.id)">Törlés</button>
+        </td>
+      </tr>
+    }
+  </tbody>
+</table>

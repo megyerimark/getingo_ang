@@ -1,1 +1,77 @@
-<p>admin-lessons works!</p>
+<h1 class="mb-4">Leckék</h1>
+
+@if (message) {
+  <div class="alert alert-success">{{ message }}</div>
+}
+
+@if (errorMessage) {
+  <div class="alert alert-danger">{{ errorMessage }}</div>
+}
+
+<div class="card mb-4">
+  <div class="card-body">
+    <h4>{{ editingId ? 'Lecke szerkesztése' : 'Új lecke' }}</h4>
+
+    <form [formGroup]="form" (ngSubmit)="save()">
+      <div class="row g-3">
+        <div class="col-md-4">
+          <select class="form-select" formControlName="category_id">
+            <option [ngValue]="null">Kategória</option>
+            @for (category of categories; track category.id) {
+              <option [ngValue]="category.id">{{ category.name }}</option>
+            }
+          </select>
+        </div>
+
+        <div class="col-md-4">
+          <input class="form-control" formControlName="title" placeholder="Cím">
+        </div>
+
+        <div class="col-md-4">
+          <input class="form-control" formControlName="slug" placeholder="slug">
+        </div>
+
+        <div class="col-12">
+          <textarea class="form-control" rows="8" formControlName="content" placeholder="Tananyag"></textarea>
+        </div>
+
+        <div class="col-12">
+          <textarea class="form-control font-monospace" rows="6" formControlName="example_code" placeholder="Példakód"></textarea>
+        </div>
+      </div>
+
+      <button class="btn btn-success mt-3" type="submit">{{ editingId ? 'Mentés' : 'Létrehozás' }}</button>
+
+      @if (editingId) {
+        <button class="btn btn-secondary mt-3 ms-2" type="button" (click)="cancel()">Mégse</button>
+      }
+    </form>
+  </div>
+</div>
+
+<div class="table-responsive">
+  <table class="table table-hover bg-white">
+    <thead>
+      <tr>
+        <th>ID</th>
+        <th>Cím</th>
+        <th>Slug</th>
+        <th>Művelet</th>
+      </tr>
+    </thead>
+
+    <tbody>
+      @for (lesson of lessons; track lesson.id) {
+        <tr>
+          <td>{{ lesson.id }}</td>
+          <td>{{ lesson.title }}</td>
+          <td>{{ lesson.slug }}</td>
+          <td>
+            <button class="btn btn-sm btn-primary me-2" (click)="edit(lesson)">Szerkesztés</button>
+            <button class="btn btn-sm btn-danger" (click)="delete(lesson.id)">Törlés</button>
+          </td>
+        </tr>
+      }
+    </tbody>
+  </table>
+</div>

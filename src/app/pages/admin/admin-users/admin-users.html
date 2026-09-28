@@ -1,1 +1,51 @@
-<p>admin-users works!</p>
+<h1 class="mb-4">Felhasználók</h1>
+
+@if (message) {
+  <div class="alert alert-success">{{ message }}</div>
+}
+
+@if (errorMessage) {
+  <div class="alert alert-danger">{{ errorMessage }}</div>
+}
+
+<div class="table-responsive">
+  <table class="table table-hover bg-white">
+    <thead>
+      <tr>
+        <th>ID</th>
+        <th>Név</th>
+        <th>Email</th>
+        <th>Szerepkör</th>
+        <th>Állapot</th>
+        <th>Műveletek</th>
+      </tr>
+    </thead>
+
+    <tbody>
+      @for (user of users; track user.id) {
+        <tr>
+          <td>{{ user.id }}</td>
+          <td>{{ user.name }}</td>
+          <td>{{ user.email }}</td>
+          <td>{{ user.role }}</td>
+          <td>
+            @if (user.is_banned) {
+              <span class="badge text-bg-danger">Tiltva</span>
+            } @else {
+              <span class="badge text-bg-success">Aktív</span>
+            }
+          </td>
+          <td>
+            <button class="btn btn-sm btn-primary me-2" (click)="changeRole(user)">
+              {{ user.role === 'admin' ? 'Legyen student' : 'Legyen admin' }}
+            </button>
+
+            <button class="btn btn-sm" [class.btn-danger]="!user.is_banned" [class.btn-success]="user.is_banned" (click)="toggleBan(user)">
+              {{ user.is_banned ? 'Feloldás' : 'Tiltás' }}
+            </button>
+          </td>
+        </tr>
+      }
+    </tbody>
+  </table>
+</div>

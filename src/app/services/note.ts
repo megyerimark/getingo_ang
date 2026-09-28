@@ -8,6 +8,18 @@ export interface Note {
   user_id: number;
   lesson_id: number;
   content: string;
+  created_at?: string;
+  updated_at?: string;
+  lesson?: {
+    id: number;
+    title: string;
+    category_id: number;
+  };
+}
+
+export interface NoteResponse {
+  message: string;
+  note: Note;
 }
 
 @Injectable({
@@ -18,18 +30,22 @@ export class NoteService {
 
   constructor(private http: HttpClient) {}
 
-  save(lessonId: number, content: string): Observable<any> {
-    return this.http.post(`${this.apiUrl}/notes`, {
+  getAll(): Observable<Note[]> {
+    return this.http.get<Note[]>(`${this.apiUrl}/notes`);
+  }
+
+  save(lessonId: number, content: string): Observable<NoteResponse> {
+    return this.http.post<NoteResponse>(`${this.apiUrl}/notes`, {
       lesson_id: lessonId,
       content
     });
   }
 
-  getAll(): Observable<Note[]> {
-    return this.http.get<Note[]>(`${this.apiUrl}/notes`);
+  update(id: number, content: string): Observable<NoteResponse> {
+    return this.http.put<NoteResponse>(`${this.apiUrl}/notes/${id}`, { content });
   }
 
-  delete(id: number): Observable<any> {
-    return this.http.delete(`${this.apiUrl}/notes/${id}`);
+  delete(id: number): Observable<{ message: string }> {
+    return this.http.delete<{ message: string }>(`${this.apiUrl}/notes/${id}`);
   }
 }

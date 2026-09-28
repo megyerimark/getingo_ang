@@ -48,6 +48,12 @@ export const routes: Routes = [
       pathMatch: 'full'
     },
     {
+    path: 'categories',
+    loadComponent: () =>
+    import('./pages/admin/admin-categories/admin-categories')
+    .then(m => m.AdminCategories)
+},
+    {
       path: 'dashboard',
       loadComponent: () => import('./pages/admin/admin-dashboard/admin-dashboard').then(m => m.AdminDashboard)
     },

@@ -1,1 +1,60 @@
-<p>admin-projects works!</p>
+<h1 class="mb-4">Projektek</h1>
+
+<div class="card mb-4">
+  <div class="card-body">
+    <form [formGroup]="form" (ngSubmit)="save()">
+      <div class="row g-3">
+        <div class="col-md-4">
+          <input class="form-control" formControlName="title" placeholder="Cím">
+        </div>
+
+        <div class="col-md-4">
+          <input class="form-control" formControlName="difficulty" placeholder="Nehézség">
+        </div>
+
+        <div class="col-md-4">
+          <input class="form-control" type="number" formControlName="estimated_time" placeholder="Idő percben">
+        </div>
+
+        <div class="col-12">
+          <textarea class="form-control" rows="4" formControlName="description" placeholder="Leírás"></textarea>
+        </div>
+
+        <div class="col-12">
+          <textarea class="form-control" rows="5" formControlName="solution" placeholder="Megoldás"></textarea>
+        </div>
+      </div>
+
+      <button class="btn btn-success mt-3">{{ editingId ? 'Mentés' : 'Létrehozás' }}</button>
+
+      @if (editingId) {
+        <button class="btn btn-secondary mt-3 ms-2" type="button" (click)="cancel()">Mégse</button>
+      }
+    </form>
+  </div>
+</div>
+
+<table class="table table-hover bg-white">
+  <thead>
+    <tr>
+      <th>Cím</th>
+      <th>Nehézség</th>
+      <th>Idő</th>
+      <th>Művelet</th>
+    </tr>
+  </thead>
+
+  <tbody>
+    @for (project of projects; track project.id) {
+      <tr>
+        <td>{{ project.title }}</td>
+        <td>{{ project.difficulty }}</td>
+        <td>{{ project.estimated_time }} perc</td>
+        <td>
+          <button class="btn btn-sm btn-primary me-2" (click)="edit(project)">Szerkesztés</button>
+          <button class="btn btn-sm btn-danger" (click)="delete(project.id)">Törlés</button>
+        </td>
+      </tr>
+    }
+  </tbody>
+</table>

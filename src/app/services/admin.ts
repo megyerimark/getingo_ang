@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { map, Observable } from 'rxjs';
+import { Category } from '../core/models/category.model';
 import { environment } from '../../environments/environment';
 import {
   AdminExercise,
@@ -107,4 +108,21 @@ export class AdminService {
   getAuditLogs(): Observable<AuditLog[]> {
     return this.http.get<any>(`${this.apiUrl}/audit-logs`).pipe(map(response => this.unwrap<AuditLog>(response)));
   }
+  getCategories(): Observable<Category[]> {
+  return this.http.get<any>(`${this.apiUrl}/categories`).pipe(
+    map(response => this.unwrap<Category>(response))
+  );
+}
+
+createCategory(data: Omit<Category, 'id' | 'lessons_count' | 'exercises_count'>): Observable<any> {
+  return this.http.post(`${this.apiUrl}/categories`, data);
+}
+
+updateCategory(id: number, data: Omit<Category, 'id' | 'lessons_count' | 'exercises_count'>): Observable<any> {
+  return this.http.put(`${this.apiUrl}/categories/${id}`, data);
+}
+
+deleteCategory(id: number): Observable<any> {
+  return this.http.delete(`${this.apiUrl}/categories/${id}`);
+}
 }
