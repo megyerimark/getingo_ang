@@ -8,12 +8,22 @@
       <div>
         <span class="eyebrow">Saját tanulási tér</span>
         <h1>Szia, {{ user.name }}!</h1>
-        <p>Itt követheted a tanulási XP-det, a jegyzeteidet és a saját Getingo Buddydat.</p>
+        <p>Itt követheted a tanulási XP-det, a projektjeidet, a jegyzeteidet és a saját Getingo Buddydat.</p>
       </div>
 
-      <button class="logout-button" type="button" (click)="logout()">
-        Kijelentkezés
-      </button>
+      <div class="dashboard-header-actions">
+        <a routerLink="/projects" class="projects-button">
+          <i class="bi bi-folder2-open"></i>
+          Projektek
+        </a>
+        <a routerLink="/account" class="account-button">
+          <i class="bi bi-gear"></i>
+          Fiókbeállítások
+        </a>
+        <button class="logout-button" type="button" (click)="logout()">
+          Kijelentkezés
+        </button>
+      </div>
     </section>
 
     <section class="summary-grid">
@@ -39,11 +49,11 @@
     <section class="buddy-card">
       <div class="buddy-heading">
         <div>
-          <span class="eyebrow">Getingo Buddy</span>
-          <h2>A tudásodból most már egy kódcica nő fel</h2>
+          <span class="eyebrow">Getingo Buddy · 100 szint</span>
+          <h2>A tudásoddal együtt nő fel Pixel</h2>
           <p>
-            Tanulással gondozási pontokat szerzel. Ezekből itathatod, etetheted és játszhatsz Pixellel,
-            aki egyre látványosabb és ügyesebb lesz, ahogy fejlődsz.
+            Pixel 100 szinten keresztül fejlődik. Minden szinten egy kicsit nagyobb lesz,
+            minden 10. szintnél pedig új vizuális korszakba lép.
           </p>
         </div>
 
@@ -65,25 +75,38 @@
           <div class="buddy-stage-panel">
             <div
               class="buddy-scene"
-              [class]="'buddy-scene stage-' + companionState.growth.key + ' mood-' + companionState.mood.key"
+              [class]="'buddy-scene ' + companionState.growth.key + ' mood-' + companionState.mood.key"
               [class.is-celebrating]="buddyAnimating">
               <div class="scene-glow"></div>
+              <div class="scene-ring ring-one"></div>
+              <div class="scene-ring ring-two"></div>
               <div class="scene-orb orb-one"></div>
               <div class="scene-orb orb-two"></div>
               <div class="scene-orb orb-three"></div>
               <div class="code-rain code-one">&lt;/&gt;</div>
               <div class="code-rain code-two">&#123; &#125;</div>
-              <div class="code-rain code-three">JS</div>
+              <div class="code-rain code-three">XP</div>
 
-              <div class="buddy-pedestal"></div>
+              @if (companionState.growth.era >= 4) {
+                <div class="holo-card holo-left"><i class="bi bi-code-slash"></i></div>
+              }
+              @if (companionState.growth.era >= 6) {
+                <div class="holo-card holo-right"><i class="bi bi-book"></i></div>
+              }
+              @if (companionState.growth.era >= 8) {
+                <div class="holo-star">★</div>
+              }
 
-              <div class="buddy-avatar" [class.is-celebrating]="buddyAnimating">
-                <img [src]="buddyAsset()" alt="Getingo Buddy" />
+              <div
+                class="buddy-avatar"
+                [style.width.px]="buddyWidth()"
+                [class.is-celebrating]="buddyAnimating">
+                <img [src]="buddyAsset()" alt="Pixel, a 3D Getingo Buddy" />
               </div>
 
               <div class="buddy-badges">
                 <span class="mood-pill">{{ moodEmoji() }} {{ companionState.mood.name }}</span>
-                <span class="level-pill">Lvl {{ companionState.growth.level }}</span>
+                <span class="level-pill">Szint {{ companionState.growth.level }} / 100</span>
               </div>
 
               @if (buddyAnimating) {
@@ -93,7 +116,7 @@
 
             <div class="buddy-identity">
               <div>
-                <span>Level {{ companionState.growth.level }}</span>
+                <span>Szint {{ companionState.growth.level }} · Korszak {{ companionState.growth.era }}/10</span>
                 <h3>{{ companionState.companion.name }}</h3>
                 <p>{{ companionState.growth.name }} · {{ companionState.mood.name }} hangulat</p>
               </div>
@@ -105,9 +128,9 @@
 
             <div class="growth-panel">
               <div class="growth-copy">
-                <span>Következő forma</span>
+                <span>{{ companionState.growth.level >= 100 ? 'Maximális szint' : 'Következő szint' }}</span>
                 <strong>
-                  {{ companionState.growth.next_stage_points === null ? 'Max szint' : companionState.growth.progress_percentage + '%' }}
+                  {{ companionState.growth.level >= 100 ? '100 / 100' : companionState.growth.progress_percentage + '%' }}
                 </strong>
               </div>
               <div class="growth-track">
@@ -128,8 +151,8 @@
               <span class="eyebrow">Állapot</span>
               <h3>Gondoskodj róla</h3>
               <p>
-                A mutatók idővel lassan csökkennek, ezért érdemes rendszeresen visszanézni.
-                Így a buddy végig vidám és látványos marad.
+                A mutatók idővel lassan csökkennek. Tanulással gondozási pontokat szerzel,
+                a gondozással pedig Pixel fejlődési pontokat kap.
               </p>
             </div>
 
@@ -205,6 +228,16 @@
       }
     </section>
 
+    <section class="projects-promo">
+      <div class="projects-promo-icon"><i class="bi bi-folder2-open"></i></div>
+      <div>
+        <span class="eyebrow">Gyakorló projektek</span>
+        <h2>Építs valamit a megszerzett tudásból</h2>
+        <p>Az admin által létrehozott projektek most már külön tanulói oldalon is elérhetők.</p>
+      </div>
+      <a routerLink="/projects">Projektek megnyitása <i class="bi bi-arrow-right"></i></a>
+    </section>
+
     <section class="notes-section">
       <div class="section-heading">
         <div>
@@ -235,6 +268,45 @@
             </div>
           }
         </div>
+      }
+    </section>
+
+    <section class="dashboard-danger-zone">
+      <div class="danger-copy">
+        <span class="eyebrow danger-eyebrow">Fiókkezelés</span>
+        <h2>Fiókom törlése</h2>
+        <p>A törlés végleges. A fiókod és a hozzá kapcsolódó személyes tanulási adatok törlődnek.</p>
+      </div>
+
+      @if (!showDeletePanel) {
+        <button type="button" class="danger-toggle" (click)="toggleDeletePanel()">
+          <i class="bi bi-trash3"></i>
+          Törlési lehetőségek
+        </button>
+      } @else {
+        <form class="delete-account-form" [formGroup]="deleteForm" (ngSubmit)="deleteAccount()">
+          @if (deleteError) {
+            <div class="delete-error">{{ deleteError }}</div>
+          }
+
+          <label>
+            <span>Jelszó a megerősítéshez</span>
+            <input type="password" formControlName="password" autocomplete="current-password">
+          </label>
+
+          <label class="delete-check">
+            <input type="checkbox" formControlName="confirm">
+            <span>Megértem, hogy a fióktörlés végleges és nem vonható vissza.</span>
+          </label>
+
+          <div class="delete-actions">
+            <button type="button" class="cancel-delete" (click)="toggleDeletePanel()">Mégse</button>
+            <button type="submit" class="confirm-delete" [disabled]="isDeleting">
+              <i class="bi bi-trash3"></i>
+              {{ isDeleting ? 'Fiók törlése...' : 'Fiókom végleges törlése' }}
+            </button>
+          </div>
+        </form>
       }
     </section>
   }

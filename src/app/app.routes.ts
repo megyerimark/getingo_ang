@@ -61,6 +61,20 @@ export const routes: Routes = [
         .then(m => m.Dashboard)
   },
   {
+    path: 'projects',
+    canActivate: [authGuard, verifiedGuard],
+    loadComponent: () =>
+      import('./pages/projects/projects')
+        .then(m => m.Projects)
+  },
+  {
+    path: 'projects/:id',
+    canActivate: [authGuard, verifiedGuard],
+    loadComponent: () =>
+      import('./pages/project-detail/project-detail')
+        .then(m => m.ProjectDetail)
+  },
+  {
     path: 'account',
     canActivate: [authGuard],
     loadComponent: () =>

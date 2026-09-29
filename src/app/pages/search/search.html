@@ -83,14 +83,15 @@
 
           <div class="result-list">
             @for (project of results.projects; track project.id) {
-              <div class="result-card static">
+              <a class="result-card" [routerLink]="['/projects', project.id]">
                 <span class="result-icon"><i class="bi bi-braces"></i></span>
                 <span class="result-copy">
                   <span class="result-type">Projekt · {{ project.difficulty }}</span>
                   <strong>{{ project.title }}</strong>
                   <small>{{ project.description }}</small>
                 </span>
-              </div>
+                <span class="open-result"><i class="bi bi-arrow-right"></i></span>
+              </a>
             }
           </div>
         </section>

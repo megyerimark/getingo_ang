@@ -136,6 +136,7 @@
 }
 
 .result-card {
+  text-decoration: none;
   width: 100%;
   display: grid;
   grid-template-columns: auto 1fr auto;
@@ -253,6 +254,7 @@ button.result-card:hover {
   }
 
   .result-card {
+  text-decoration: none;
     grid-template-columns: auto 1fr;
   }
 

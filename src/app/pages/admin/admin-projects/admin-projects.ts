@@ -16,7 +16,13 @@ export class AdminProjects implements OnInit {
     title: new FormControl('', { nonNullable: true, validators: Validators.required }),
     description: new FormControl('', { nonNullable: true, validators: Validators.required }),
     difficulty: new FormControl('kezdő', { nonNullable: true }),
-    estimated_time: new FormControl(30, { nonNullable: true }),
+    estimated_time: new FormControl(30, { nonNullable: true, validators: [Validators.min(1)] }),
+    xp_reward: new FormControl(25, { nonNullable: true, validators: [Validators.min(0)] }),
+    starter_html: new FormControl('', { nonNullable: true }),
+    starter_css: new FormControl('', { nonNullable: true }),
+    starter_javascript: new FormControl('', { nonNullable: true }),
+    validation_type: new FormControl<'console_exact' | 'console_contains'>('console_exact', { nonNullable: true }),
+    expected_output: new FormControl('', { nonNullable: true }),
     solution: new FormControl('', { nonNullable: true })
   });
 
@@ -53,6 +59,12 @@ export class AdminProjects implements OnInit {
       description: project.description,
       difficulty: project.difficulty,
       estimated_time: project.estimated_time,
+      xp_reward: project.xp_reward ?? 25,
+      starter_html: project.starter_html ?? '',
+      starter_css: project.starter_css ?? '',
+      starter_javascript: project.starter_javascript ?? '',
+      validation_type: project.validation_type ?? 'console_exact',
+      expected_output: project.expected_output ?? '',
       solution: project.solution ?? ''
     });
   }
@@ -70,6 +82,12 @@ export class AdminProjects implements OnInit {
       description: '',
       difficulty: 'kezdő',
       estimated_time: 30,
+      xp_reward: 25,
+      starter_html: '',
+      starter_css: '',
+      starter_javascript: '',
+      validation_type: 'console_exact',
+      expected_output: '',
       solution: ''
     });
   }

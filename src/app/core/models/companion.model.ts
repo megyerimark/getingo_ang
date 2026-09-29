@@ -1,5 +1,15 @@
 export type CompanionActionKey = 'water' | 'feed' | 'play';
-export type CompanionStageKey = 'seed' | 'sprout' | 'budding' | 'bloom' | 'legendary';
+export type CompanionStageKey =
+  | 'era-1'
+  | 'era-2'
+  | 'era-3'
+  | 'era-4'
+  | 'era-5'
+  | 'era-6'
+  | 'era-7'
+  | 'era-8'
+  | 'era-9'
+  | 'era-10';
 export type CompanionMoodKey = 'wilted' | 'calm' | 'happy' | 'radiant';
 
 export interface Companion {
@@ -17,13 +27,19 @@ export interface Companion {
 export interface CompanionGrowth {
   key: CompanionStageKey;
   level: number;
+  max_level: number;
+  era: number;
   name: string;
   progress_percentage: number;
+  current_level_points: number;
+  next_level_points: number | null;
+  points_to_next_level: number;
   next_stage_points: number | null;
   points_to_next_stage: number;
   knowledge_growth_points: number;
   care_growth_points: number;
   total_growth_points: number;
+  size_percentage: number;
 }
 
 export interface CompanionMood {

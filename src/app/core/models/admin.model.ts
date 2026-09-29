@@ -85,6 +85,12 @@ export interface AdminProject {
   difficulty: string;
   estimated_time: number;
   solution?: string | null;
+  starter_html?: string | null;
+  starter_css?: string | null;
+  starter_javascript?: string | null;
+  validation_type: 'console_exact' | 'console_contains';
+  expected_output?: string | null;
+  xp_reward: number;
 }
 
 export interface AuditLog {

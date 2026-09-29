@@ -1,6 +1,9 @@
 import { Component, OnInit } from '@angular/core';
-import { Router } from '@angular/router';
+import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
+import { Router, RouterLink } from '@angular/router';
+import { finalize } from 'rxjs';
 import { Auth } from '../../services/auth';
+import { AccountService } from '../../services/account';
 import { User } from '../../core/models/user.model';
 import { Note, NoteService } from '../../services/note';
 import {
@@ -11,7 +14,7 @@ import { CompanionService } from '../../services/companion';
 
 @Component({
   selector: 'app-dashboard',
-  imports: [],
+  imports: [ReactiveFormsModule, RouterLink],
   templateUrl: './dashboard.html',
   styleUrl: './dashboard.scss'
 })
@@ -27,9 +30,24 @@ export class Dashboard implements OnInit {
   buddyAnimating = false;
   companionMessage = '';
   companionError = '';
+  showDeletePanel = false;
+  isDeleting = false;
+  deleteError = '';
+
+  deleteForm = new FormGroup({
+    password: new FormControl('', {
+      nonNullable: true,
+      validators: [Validators.required]
+    }),
+    confirm: new FormControl(false, {
+      nonNullable: true,
+      validators: [Validators.requiredTrue]
+    })
+  });
 
   constructor(
     private auth: Auth,
+    private accountService: AccountService,
     private router: Router,
     private noteService: NoteService,
     private companionService: CompanionService
@@ -128,7 +146,12 @@ export class Dashboard implements OnInit {
       return '/buddy-dog.png';
     }
 
-    return '/buddy-cat.png';
+    return '/buddy-cat-3d.png';
+  }
+
+  buddyWidth(): number {
+    const size = this.companionState?.growth.size_percentage ?? 70;
+    return Math.round(180 * (size / 70));
   }
 
   moodEmoji(): string {
@@ -168,11 +191,11 @@ export class Dashboard implements OnInit {
       return 'Minden lecke és kvíz közelebb visz a következő szinthez.';
     }
 
-    if (this.companionState.growth.next_stage_points === null) {
-      return 'Elérted a jelenlegi legmagasabb buddy szintet. Most már csak élvezd a társaságát.';
+    if (this.companionState.growth.level >= this.companionState.growth.max_level) {
+      return 'Elérted a 100. szintet: Pixel a legmagasabb Getingo Buddy formájában van.';
     }
 
-    return `Még ${this.companionState.growth.points_to_next_stage} fejlődési pont kell a következő formához.`;
+    return `Még ${this.companionState.growth.points_to_next_level} fejlődési pont kell a ${this.companionState.growth.level + 1}. szinthez.`;
   }
 
   deleteNote(note: Note): void {
@@ -183,6 +206,44 @@ export class Dashboard implements OnInit {
         this.notes = this.notes.filter(item => item.id !== note.id);
       }
     });
+  }
+
+  toggleDeletePanel(): void {
+    this.showDeletePanel = !this.showDeletePanel;
+    this.deleteError = '';
+
+    if (!this.showDeletePanel) {
+      this.deleteForm.reset({ password: '', confirm: false });
+    }
+  }
+
+  deleteAccount(): void {
+    if (this.deleteForm.invalid) {
+      this.deleteForm.markAllAsTouched();
+      return;
+    }
+
+    this.deleteError = '';
+    this.isDeleting = true;
+
+    this.accountService.deleteAccount(this.deleteForm.controls.password.value)
+      .pipe(finalize(() => this.isDeleting = false))
+      .subscribe({
+        next: () => {
+          this.auth.clearAuth();
+          this.router.navigate(['/']);
+        },
+        error: error => {
+          const errors = error.error?.errors;
+          if (errors) {
+            const firstKey = Object.keys(errors)[0];
+            this.deleteError = errors[firstKey]?.[0] ?? 'Nem sikerült törölni a fiókot.';
+            return;
+          }
+
+          this.deleteError = error.error?.message ?? 'Nem sikerült törölni a fiókot.';
+        }
+      });
   }
 
   logout(): void {

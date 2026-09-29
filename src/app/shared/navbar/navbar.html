@@ -29,6 +29,12 @@
           Tananyagok
         </a>
 
+        @if (auth.currentUser()?.email_verified_at) {
+          <a routerLink="/projects" routerLinkActive="active" (click)="closeMenu()">
+            Projektek
+          </a>
+        }
+
         <a routerLink="/search" routerLinkActive="active" (click)="closeMenu()">
           <i class="bi bi-search"></i>
           Keresés
