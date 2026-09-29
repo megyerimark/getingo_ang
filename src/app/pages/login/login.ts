@@ -85,6 +85,11 @@ export class Login {
 
         next: response => {
 
+          if (!response.user.email_verified_at) {
+            this.router.navigate(['/verify-email']);
+            return;
+          }
+
           if (response.user.role === 'admin') {
 
             this.router.navigate([

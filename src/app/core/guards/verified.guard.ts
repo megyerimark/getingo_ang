@@ -3,20 +3,16 @@ import { CanActivateFn, Router } from '@angular/router';
 import { catchError, map, of } from 'rxjs';
 import { Auth } from '../../services/auth';
 
-export const adminGuard: CanActivateFn = () => {
+export const verifiedGuard: CanActivateFn = () => {
   const auth = inject(Auth);
   const router = inject(Router);
 
   return auth.me().pipe(
-    map(user => {
-      if (!user.email_verified_at) {
-        return router.createUrlTree(['/verify-email']);
-      }
-
-      return user.role === 'admin'
+    map(user =>
+      user.email_verified_at
         ? true
-        : router.createUrlTree(['/dashboard']);
-    }),
+        : router.createUrlTree(['/verify-email'])
+    ),
     catchError(() => of(router.createUrlTree(['/login'])))
   );
 };

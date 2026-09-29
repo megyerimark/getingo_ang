@@ -1,6 +1,7 @@
 import { Routes } from '@angular/router';
 import { authGuard } from './core/guards/auth.guard';
 import { adminGuard } from './core/guards/admin.guard';
+import { verifiedGuard } from './core/guards/verified.guard';
 
 export const routes: Routes = [
   {
@@ -22,6 +23,19 @@ export const routes: Routes = [
         .then(m => m.Register)
   },
   {
+    path: 'verify-email',
+    canActivate: [authGuard],
+    loadComponent: () =>
+      import('./pages/verify-email/verify-email')
+        .then(m => m.VerifyEmail)
+  },
+  {
+    path: 'email-verified',
+    loadComponent: () =>
+      import('./pages/email-verified/email-verified')
+        .then(m => m.EmailVerified)
+  },
+  {
     path: 'categories',
     loadComponent: () =>
       import('./pages/categories/categories')
@@ -41,7 +55,7 @@ export const routes: Routes = [
   },
   {
     path: 'dashboard',
-    canActivate: [authGuard],
+    canActivate: [authGuard, verifiedGuard],
     loadComponent: () =>
       import('./pages/dashboard/dashboard')
         .then(m => m.Dashboard)

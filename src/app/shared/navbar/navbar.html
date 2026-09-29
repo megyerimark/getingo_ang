@@ -42,7 +42,12 @@
             <span>{{ user.name }}</span>
           </span>
 
-          @if (user.role === 'admin') {
+          @if (!user.email_verified_at) {
+            <a class="action-button primary" routerLink="/verify-email" (click)="closeMenu()">
+              <i class="bi bi-envelope-check"></i>
+              Email megerősítése
+            </a>
+          } @else if (user.role === 'admin') {
             <a class="action-button ghost" routerLink="/admin" (click)="closeMenu()">
               <i class="bi bi-grid"></i>
               Admin

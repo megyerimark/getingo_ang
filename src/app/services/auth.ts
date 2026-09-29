@@ -75,6 +75,18 @@ export class Auth {
     );
   }
 
+  resendVerificationEmail(): Observable<{ message: string; verified: boolean }> {
+    return this.csrf().pipe(
+      switchMap(() =>
+        this.http.post<{ message: string; verified: boolean }>(
+          `${this.apiUrl}/email/verification-notification`,
+          {},
+          { withCredentials: true }
+        )
+      )
+    );
+  }
+
   logout(): Observable<{ message: string }> {
     return this.csrf().pipe(
       switchMap(() =>
@@ -151,6 +163,18 @@ export class Auth {
     return this.http.get<MeResponse>(`${this.apiUrl}/user`).pipe(
       map(response => response.user),
       tap(user => this.currentUser.set(user))
+    );
+  }
+
+  resendVerificationEmail(): Observable<{ message: string; verified: boolean }> {
+    return this.csrf().pipe(
+      switchMap(() =>
+        this.http.post<{ message: string; verified: boolean }>(
+          `${this.apiUrl}/email/verification-notification`,
+          {},
+          { withCredentials: true }
+        )
+      )
     );
   }
 
