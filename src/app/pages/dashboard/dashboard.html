@@ -49,11 +49,11 @@
     <section class="buddy-card">
       <div class="buddy-heading">
         <div>
-          <span class="eyebrow">Getingo Buddy · 100 szint</span>
-          <h2>A tudásoddal együtt nő fel Pixel</h2>
+          <span class="eyebrow">Getingo Buddy · 100 szint · 10 evolúció</span>
+          <h2>A tudásoddal együtt fejlődik Pixel</h2>
           <p>
-            Pixel 100 szinten keresztül fejlődik. Minden szinten egy kicsit nagyobb lesz,
-            minden 10. szintnél pedig új vizuális korszakba lép.
+            Pixel minden szinten egy kicsit nő, és minden 10. szintnél új evolúciós korszakba lép.
+            A korszakokkal új platform, aura, hologramok, robotsegítő és energiaeffektek nyílnak meg.
           </p>
         </div>
 
@@ -77,6 +77,8 @@
               class="buddy-scene"
               [class]="'buddy-scene ' + companionState.growth.key + ' mood-' + companionState.mood.key"
               [class.is-celebrating]="buddyAnimating">
+
+              <div class="evolution-backdrop"></div>
               <div class="scene-glow"></div>
               <div class="scene-ring ring-one"></div>
               <div class="scene-ring ring-two"></div>
@@ -87,14 +89,71 @@
               <div class="code-rain code-two">&#123; &#125;</div>
               <div class="code-rain code-three">XP</div>
 
-              @if (companionState.growth.era >= 4) {
+              <div class="evolution-platform">
+                <span class="platform-glow"></span>
+                <span class="platform-ring platform-ring-one"></span>
+                <span class="platform-ring platform-ring-two"></span>
+                <span class="platform-surface"></span>
+                <span class="platform-node node-left"></span>
+                <span class="platform-node node-right"></span>
+              </div>
+
+              @if (companionState.growth.era >= 2) {
+                <div class="evolution-aura aura-one"></div>
+              }
+
+              @if (companionState.growth.era >= 3) {
                 <div class="holo-card holo-left"><i class="bi bi-code-slash"></i></div>
               }
-              @if (companionState.growth.era >= 6) {
+
+              @if (companionState.growth.era >= 4) {
                 <div class="holo-card holo-right"><i class="bi bi-book"></i></div>
+                <div class="tech-pylon pylon-left"></div>
+                <div class="tech-pylon pylon-right"></div>
               }
+
+              @if (companionState.growth.era >= 5) {
+                <div class="holo-card holo-bottom"><i class="bi bi-bar-chart-fill"></i></div>
+                <div class="energy-core"></div>
+              }
+
+              @if (companionState.growth.era >= 6) {
+                <div class="buddy-drone">
+                  <span class="drone-ear drone-ear-left"></span>
+                  <span class="drone-ear drone-ear-right"></span>
+                  <span class="drone-face">⌁</span>
+                  <span class="drone-antenna"></span>
+                </div>
+              }
+
+              @if (companionState.growth.era >= 7) {
+                <div class="orbit orbit-one"><span></span></div>
+                <div class="orbit orbit-two"><span></span></div>
+                <div class="orbit-dot orbit-dot-one"></div>
+                <div class="orbit-dot orbit-dot-two"></div>
+                <div class="orbit-dot orbit-dot-three"></div>
+              }
+
               @if (companionState.growth.era >= 8) {
-                <div class="holo-star">★</div>
+                <div class="energy-wing wing-left"><span></span><span></span><span></span></div>
+                <div class="energy-wing wing-right"><span></span><span></span><span></span></div>
+                <div class="master-halo"></div>
+              }
+
+              @if (companionState.growth.era >= 9) {
+                <div class="legend-chip">
+                  <i class="bi bi-stars"></i>
+                </div>
+                <div class="holo-star star-one">★</div>
+                <div class="holo-star star-two">★</div>
+                <div class="holo-star star-three">★</div>
+              }
+
+              @if (companionState.growth.era >= 10) {
+                <div class="ultimate-ring ultimate-ring-one"></div>
+                <div class="ultimate-ring ultimate-ring-two"></div>
+                <div class="ultimate-rays"></div>
+                <div class="ultimate-badge"><i class="bi bi-lightning-charge-fill"></i></div>
               }
 
               <div
@@ -102,6 +161,11 @@
                 [style.width.px]="buddyWidth()"
                 [class.is-celebrating]="buddyAnimating">
                 <img [src]="buddyAsset()" alt="Pixel, a 3D Getingo Buddy" />
+              </div>
+
+              <div class="era-chip">
+                <span>Korszak {{ companionState.growth.era }}/10</span>
+                <strong>{{ companionState.growth.name }}</strong>
               </div>
 
               <div class="buddy-badges">
@@ -124,6 +188,17 @@
                 <span>Hangulat</span>
                 <strong>{{ companionState.mood.score }}%</strong>
               </div>
+            </div>
+
+            <div class="evolution-roadmap">
+              @for (era of [1,2,3,4,5,6,7,8,9,10]; track era) {
+                <span
+                  class="evolution-step"
+                  [class.is-reached]="companionState.growth.era >= era"
+                  [class.is-current]="companionState.growth.era === era">
+                  {{ era }}
+                </span>
+              }
             </div>
 
             <div class="growth-panel">
