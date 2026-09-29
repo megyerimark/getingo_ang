@@ -112,21 +112,67 @@ export class Dashboard implements OnInit {
     return this.companionState?.actions.find(item => item.key === action)?.growth ?? 0;
   }
 
+  actionLabel(action: CompanionActionKey): string {
+    return this.companionState?.actions.find(item => item.key === action)?.label ?? action;
+  }
+
   actionIcon(action: CompanionActionKey | null): string {
     if (action === 'water') return '💧';
-    if (action === 'feed') return '🍎';
+    if (action === 'feed') return '🐟';
     if (action === 'play') return '✨';
     return '';
   }
 
-  private triggerBuddyAnimation(): void {
-    this.buddyAnimating = false;
-    setTimeout(() => {
-      this.buddyAnimating = true;
-      setTimeout(() => {
-        this.buddyAnimating = false;
-      }, 900);
-    });
+  buddyAsset(): string {
+    if (this.companionState?.companion.selected_skin?.includes('dog')) {
+      return '/buddy-dog.png';
+    }
+
+    return '/buddy-cat.png';
+  }
+
+  moodEmoji(): string {
+    switch (this.companionState?.mood.key) {
+      case 'radiant':
+        return '🌟';
+      case 'happy':
+        return '😸';
+      case 'calm':
+        return '🙂';
+      default:
+        return '😴';
+    }
+  }
+
+  companionTip(): string {
+    if (!this.companionState) {
+      return 'Teljesíts egy leckét, hogy pontokat szerezz a buddy gondozásához.';
+    }
+
+    const { water, hunger, happiness } = this.companionState.companion;
+    const minimum = Math.min(water, hunger, happiness);
+
+    if (minimum === water) {
+      return 'Pixel most egy kis itatásnak örülne a legjobban.';
+    }
+
+    if (minimum === hunger) {
+      return 'Adj neki egy falatot, hogy újra lendületbe jöjjön.';
+    }
+
+    return 'Játssz vele egyet, hogy még vidámabb legyen.';
+  }
+
+  progressHint(): string {
+    if (!this.companionState) {
+      return 'Minden lecke és kvíz közelebb visz a következő szinthez.';
+    }
+
+    if (this.companionState.growth.next_stage_points === null) {
+      return 'Elérted a jelenlegi legmagasabb buddy szintet. Most már csak élvezd a társaságát.';
+    }
+
+    return `Még ${this.companionState.growth.points_to_next_stage} fejlődési pont kell a következő formához.`;
   }
 
   deleteNote(note: Note): void {
@@ -146,6 +192,16 @@ export class Dashboard implements OnInit {
         this.auth.clearAuth();
         this.router.navigate(['/login']);
       }
+    });
+  }
+
+  private triggerBuddyAnimation(): void {
+    this.buddyAnimating = false;
+    setTimeout(() => {
+      this.buddyAnimating = true;
+      setTimeout(() => {
+        this.buddyAnimating = false;
+      }, 900);
     });
   }
 }
