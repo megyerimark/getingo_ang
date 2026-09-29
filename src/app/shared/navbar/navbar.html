@@ -1,37 +1,102 @@
 <nav class="navbar navbar-expand-lg navbar-dark">
   <div class="container">
-    <a class="navbar-brand fw-bold" routerLink="/">Getingo</a>
+    <a
+      class="navbar-brand fw-bold"
+      routerLink="/"
+      (click)="closeMenu()">
+      Getingo
+    </a>
 
-    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#mainNavbar">
+    <button
+      class="navbar-toggler"
+      type="button"
+      aria-label="Menü megnyitása"
+      aria-controls="mainNavbar"
+      [attr.aria-expanded]="isMenuOpen"
+      (click)="toggleMenu()">
       <span class="navbar-toggler-icon"></span>
     </button>
 
-    <div id="mainNavbar" class="collapse navbar-collapse">
+    <div
+      id="mainNavbar"
+      class="collapse navbar-collapse"
+      [class.show]="isMenuOpen">
+
       <ul class="navbar-nav me-auto">
         <li class="nav-item">
-          <a class="nav-link" routerLink="/" routerLinkActive="active" [routerLinkActiveOptions]="{exact:true}">Főoldal</a>
+          <a
+            class="nav-link"
+            routerLink="/"
+            routerLinkActive="active"
+            [routerLinkActiveOptions]="{ exact: true }"
+            (click)="closeMenu()">
+            Főoldal
+          </a>
         </li>
+
         <li class="nav-item">
-          <a class="nav-link" routerLink="/categories" routerLinkActive="active">Tananyagok</a>
+          <a
+            class="nav-link"
+            routerLink="/categories"
+            routerLinkActive="active"
+            (click)="closeMenu()">
+            Tananyagok
+          </a>
         </li>
+
         <li class="nav-item">
-          <a class="nav-link" routerLink="/search" routerLinkActive="active">Keresés</a>
+          <a
+            class="nav-link"
+            routerLink="/search"
+            routerLinkActive="active"
+            (click)="closeMenu()">
+            Keresés
+          </a>
         </li>
       </ul>
 
-      <div class="d-flex gap-2 align-items-center">
+      <div class="navbar-actions">
         @if (auth.currentUser(); as user) {
-          <span class="text-light me-2">{{ user.name }}</span>
+          <span class="navbar-user">
+            {{ user.name }}
+          </span>
 
           @if (user.role === 'admin') {
-            <a class="btn btn-warning btn-sm" routerLink="/admin">Admin</a>
+            <a
+              class="btn btn-warning btn-sm"
+              routerLink="/admin"
+              (click)="closeMenu()">
+              Admin
+            </a>
+          } @else {
+            <a
+              class="btn btn-outline-light btn-sm"
+              routerLink="/dashboard"
+              (click)="closeMenu()">
+              Fiókom
+            </a>
           }
 
-          <a class="btn btn-outline-light btn-sm" routerLink="/dashboard">Fiókom</a>
-          <button class="btn btn-danger btn-sm" type="button" (click)="logout()">Kilépés</button>
+          <button
+            class="btn btn-danger btn-sm"
+            type="button"
+            (click)="logout()">
+            Kilépés
+          </button>
         } @else {
-          <a class="btn btn-outline-light btn-sm" routerLink="/login">Belépés</a>
-          <a class="btn btn-success btn-sm" routerLink="/register">Regisztráció</a>
+          <a
+            class="btn btn-outline-light btn-sm"
+            routerLink="/login"
+            (click)="closeMenu()">
+            Belépés
+          </a>
+
+          <a
+            class="btn btn-success btn-sm"
+            routerLink="/register"
+            (click)="closeMenu()">
+            Regisztráció
+          </a>
         }
       </div>
     </div>

@@ -91,6 +91,10 @@ export interface AuditLog {
   id: number;
   action: string;
   user_id?: number | null;
+  actor_user_id?: number | null;
+  target_type?: string | null;
+  target_id?: number | null;
+  metadata?: Record<string, unknown> | string | null;
   ip_address?: string | null;
   created_at: string;
 }
