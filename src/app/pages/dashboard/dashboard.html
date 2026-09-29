@@ -1,101 +1,195 @@
-<div class="container py-5">
+<div class="dashboard-page">
   @if (isLoading) {
-    <div class="text-center py-5">
+    <div class="dashboard-loading">
       <div class="spinner-border"></div>
     </div>
   } @else if (user) {
-    <div class="d-flex justify-content-between align-items-center mb-4">
+    <section class="dashboard-header">
       <div>
+        <span class="eyebrow">Saját tanulási tér</span>
         <h1>Szia, {{ user.name }}!</h1>
-        <p class="text-secondary mb-0">{{ user.email }}</p>
+        <p>{{ user.email }}</p>
       </div>
 
-      <button class="btn btn-outline-danger" type="button" (click)="logout()">
+      <button class="logout-button" type="button" (click)="logout()">
         Kijelentkezés
       </button>
-    </div>
+    </section>
 
-    <div class="row g-3 mb-5">
-      <div class="col-md-4">
-        <div class="card shadow-sm h-100">
-          <div class="card-body">
-            <h5 class="card-title">XP</h5>
-            <div class="display-6">{{ user.xp_points }}</div>
-          </div>
-        </div>
-      </div>
+    <section class="summary-grid">
+      <article class="summary-card">
+        <span class="summary-label">Összes XP</span>
+        <strong>{{ user.xp_points }}</strong>
+        <small>A tanulási XP soha nem fogy el.</small>
+      </article>
 
-      <div class="col-md-4">
-        <div class="card shadow-sm h-100">
-          <div class="card-body">
-            <h5 class="card-title">Streak</h5>
-            <div class="display-6">{{ user.current_streak }}</div>
-          </div>
-        </div>
-      </div>
+      <article class="summary-card">
+        <span class="summary-label">Streak</span>
+        <strong>{{ user.current_streak }}</strong>
+        <small>Egymást követő tanulási napok.</small>
+      </article>
 
-      <div class="col-md-4">
-        <div class="card shadow-sm h-100">
-          <div class="card-body">
-            <h5 class="card-title">Szerepkör</h5>
-            <div class="display-6">{{ user.role }}</div>
-          </div>
-        </div>
-      </div>
-    </div>
+      <article class="summary-card">
+        <span class="summary-label">Fiók</span>
+        <strong class="role-value">{{ user.role }}</strong>
+        <small>A Getingo profilod szerepköre.</small>
+      </article>
+    </section>
 
-    <div>
-      <div class="d-flex justify-content-between align-items-center mb-3">
+    <section class="buddy-card">
+      <div class="buddy-heading">
         <div>
-          <h2 class="mb-1">Jegyzeteim</h2>
-          <p class="text-secondary mb-0">A leckékhez mentett saját jegyzeteid.</p>
+          <span class="eyebrow">Getingo Buddy</span>
+          <h2>A tudásoddal együtt fejlődik</h2>
+          <p>Tanulással gondozási pontokat szerzel. Ezeket elköltheted a társad gondozására.</p>
         </div>
 
-        <span class="badge text-bg-secondary">
-          {{ notes.length }} jegyzet
-        </span>
+        @if (companionState) {
+          <div class="care-balance">
+            <span>Gondozási pont</span>
+            <strong>{{ companionState.companion.care_points }}</strong>
+          </div>
+        }
+      </div>
+
+      @if (companionLoading) {
+        <div class="buddy-loading">
+          <div class="spinner-border spinner-border-sm"></div>
+          <span>Buddy betöltése...</span>
+        </div>
+      } @else if (companionState) {
+        <div class="buddy-layout">
+          <div class="buddy-stage-panel">
+            <div class="buddy-scene" [class]="'buddy-scene stage-' + companionState.growth.key">
+              <div class="buddy-glow"></div>
+              <div class="plant">
+                <span class="leaf leaf-left"></span>
+                <span class="leaf leaf-right"></span>
+                <span class="stem"></span>
+                <span class="pot"></span>
+              </div>
+            </div>
+
+            <div class="buddy-identity">
+              <div>
+                <span>Level {{ companionState.growth.level }}</span>
+                <h3>{{ companionState.companion.name }}</h3>
+                <p>{{ companionState.growth.name }}</p>
+              </div>
+              <strong>{{ companionState.xp_points }} XP</strong>
+            </div>
+
+            <div class="growth-bar">
+              <div class="growth-track">
+                <span [style.width.%]="companionState.growth.progress_percentage"></span>
+              </div>
+              @if (companionState.growth.next_stage_xp) {
+                <small>Még {{ companionState.growth.xp_to_next_stage }} XP a következő fejlődésig.</small>
+              } @else {
+                <small>Elérted a jelenlegi legmagasabb fejlődési szintet.</small>
+              }
+            </div>
+          </div>
+
+          <div class="buddy-care-panel">
+            <div class="meter-row">
+              <div class="meter-copy">
+                <span>Víz</span>
+                <strong>{{ companionState.companion.water }}%</strong>
+              </div>
+              <div class="meter-track"><span [style.width.%]="companionState.companion.water"></span></div>
+            </div>
+
+            <div class="meter-row">
+              <div class="meter-copy">
+                <span>Jóllakottság</span>
+                <strong>{{ companionState.companion.hunger }}%</strong>
+              </div>
+              <div class="meter-track"><span [style.width.%]="companionState.companion.hunger"></span></div>
+            </div>
+
+            <div class="meter-row">
+              <div class="meter-copy">
+                <span>Kedv</span>
+                <strong>{{ companionState.companion.happiness }}%</strong>
+              </div>
+              <div class="meter-track"><span [style.width.%]="companionState.companion.happiness"></span></div>
+            </div>
+
+            <div class="care-actions">
+              <button
+                type="button"
+                [disabled]="companionAction !== null"
+                (click)="careForCompanion('water')">
+                <span class="action-icon">💧</span>
+                <span>Öntözés</span>
+                <small>-{{ actionCost('water') }} pont</small>
+              </button>
+
+              <button
+                type="button"
+                [disabled]="companionAction !== null"
+                (click)="careForCompanion('feed')">
+                <span class="action-icon">🍎</span>
+                <span>Etetés</span>
+                <small>-{{ actionCost('feed') }} pont</small>
+              </button>
+
+              <button
+                type="button"
+                [disabled]="companionAction !== null"
+                (click)="careForCompanion('play')">
+                <span class="action-icon">✨</span>
+                <span>Játék</span>
+                <small>-{{ actionCost('play') }} pont</small>
+              </button>
+            </div>
+
+            @if (companionMessage) {
+              <div class="buddy-message success">{{ companionMessage }}</div>
+            }
+
+            @if (companionError) {
+              <div class="buddy-message error">{{ companionError }}</div>
+            }
+          </div>
+        </div>
+      } @else if (companionError) {
+        <div class="buddy-message error">{{ companionError }}</div>
+      }
+    </section>
+
+    <section class="notes-section">
+      <div class="section-heading">
+        <div>
+          <span class="eyebrow">Saját tartalom</span>
+          <h2>Jegyzeteim</h2>
+          <p>A leckékhez mentett saját jegyzeteid.</p>
+        </div>
+        <span class="note-count">{{ notes.length }} jegyzet</span>
       </div>
 
       @if (notesLoading) {
-        <div class="text-center py-4">
+        <div class="notes-loading">
           <div class="spinner-border spinner-border-sm"></div>
         </div>
       } @else {
-        <div class="row g-3">
+        <div class="notes-grid">
           @for (note of notes; track note.id) {
-            <div class="col-12">
-              <div class="card shadow-sm">
-                <div class="card-body">
-                  <div class="d-flex justify-content-between gap-3">
-                    <div class="flex-grow-1">
-                      <h5 class="card-title mb-2">
-                        {{ note.lesson?.title ?? 'Lecke' }}
-                      </h5>
-
-                      <p class="card-text note-content mb-0">
-                        {{ note.content }}
-                      </p>
-                    </div>
-
-                    <button
-                      class="btn btn-sm btn-outline-danger align-self-start"
-                      type="button"
-                      (click)="deleteNote(note)">
-                      Törlés
-                    </button>
-                  </div>
-                </div>
+            <article class="note-card">
+              <div>
+                <h3>{{ note.lesson?.title ?? 'Lecke' }}</h3>
+                <p>{{ note.content }}</p>
               </div>
-            </div>
+              <button type="button" (click)="deleteNote(note)">Törlés</button>
+            </article>
           } @empty {
-            <div class="col-12">
-              <div class="alert alert-light border">
-                Még nincs mentett jegyzeted. Nyiss meg egy leckét és készíts jegyzetet.
-              </div>
+            <div class="empty-state">
+              Még nincs mentett jegyzeted. Nyiss meg egy leckét és készíts jegyzetet.
             </div>
           }
         </div>
       }
-    </div>
+    </section>
   }
 </div>
