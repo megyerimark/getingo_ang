@@ -40,8 +40,8 @@
       <div class="buddy-heading">
         <div>
           <span class="eyebrow">Getingo Buddy</span>
-          <h2>A tudásoddal együtt fejlődik</h2>
-          <p>Tanulással gondozási pontokat szerzel. Ezeket elköltheted a társad gondozására.</p>
+          <h2>A tudásodból virág lesz</h2>
+          <p>Tanulással gondozási pontokat szerzel. Az öntözés, etetés és játék pedig ténylegesen szebbé és fejlettebbé teszi a Kódvirágodat.</p>
         </div>
 
         @if (companionState) {
@@ -60,14 +60,74 @@
       } @else if (companionState) {
         <div class="buddy-layout">
           <div class="buddy-stage-panel">
-            <div class="buddy-scene" [class]="'buddy-scene stage-' + companionState.growth.key">
-              <div class="buddy-glow"></div>
+            <div
+              class="buddy-scene"
+              [class]="'buddy-scene stage-' + companionState.growth.key + ' mood-' + companionState.mood.key"
+              [class.is-celebrating]="buddyAnimating">
+              <div class="scene-sun"></div>
+              <div class="scene-cloud cloud-one"></div>
+              <div class="scene-cloud cloud-two"></div>
+              <span class="sparkle sparkle-one"></span>
+              <span class="sparkle sparkle-two"></span>
+              <span class="sparkle sparkle-three"></span>
+              <div class="ground"></div>
+
               <div class="plant">
-                <span class="leaf leaf-left"></span>
-                <span class="leaf leaf-right"></span>
-                <span class="stem"></span>
-                <span class="pot"></span>
+                <span class="seed-shape"></span>
+                <span class="stem stem-main"></span>
+                <span class="branch branch-left"></span>
+                <span class="branch branch-right"></span>
+
+                <span class="leaf leaf-one"></span>
+                <span class="leaf leaf-two"></span>
+                <span class="leaf leaf-three"></span>
+                <span class="leaf leaf-four"></span>
+                <span class="leaf leaf-five"></span>
+                <span class="leaf leaf-six"></span>
+
+                <span class="bud bud-main"></span>
+                <span class="bud bud-left"></span>
+                <span class="bud bud-right"></span>
+
+                <span class="flower flower-main">
+                  <i class="petal petal-one"></i>
+                  <i class="petal petal-two"></i>
+                  <i class="petal petal-three"></i>
+                  <i class="petal petal-four"></i>
+                  <i class="petal petal-five"></i>
+                  <i class="petal petal-six"></i>
+                  <i class="flower-center"></i>
+                </span>
+
+                <span class="flower flower-left">
+                  <i class="petal petal-one"></i>
+                  <i class="petal petal-two"></i>
+                  <i class="petal petal-three"></i>
+                  <i class="petal petal-four"></i>
+                  <i class="petal petal-five"></i>
+                  <i class="petal petal-six"></i>
+                  <i class="flower-center"></i>
+                </span>
+
+                <span class="flower flower-right">
+                  <i class="petal petal-one"></i>
+                  <i class="petal petal-two"></i>
+                  <i class="petal petal-three"></i>
+                  <i class="petal petal-four"></i>
+                  <i class="petal petal-five"></i>
+                  <i class="petal petal-six"></i>
+                  <i class="flower-center"></i>
+                </span>
+
+                <span class="pot">
+                  <i class="pot-rim"></i>
+                  <i class="pot-logo">G</i>
+                </span>
               </div>
+
+              @if (buddyAnimating) {
+                <div class="care-burst">{{ actionIcon(lastCompanionAction) }}</div>
+              }
             </div>
 
             <div class="buddy-identity">
@@ -76,28 +136,46 @@
                 <h3>{{ companionState.companion.name }}</h3>
                 <p>{{ companionState.growth.name }}</p>
               </div>
-              <strong>{{ companionState.xp_points }} XP</strong>
+              <div class="mood-badge" [class]="'mood-badge mood-' + companionState.mood.key">
+                <span>{{ companionState.mood.name }}</span>
+                <strong>{{ companionState.mood.score }}%</strong>
+              </div>
             </div>
 
             <div class="growth-bar">
+              <div class="growth-copy">
+                <span>Fejlődés</span>
+                <strong>{{ companionState.growth.total_growth_points }} pont</strong>
+              </div>
               <div class="growth-track">
                 <span [style.width.%]="companionState.growth.progress_percentage"></span>
               </div>
-              @if (companionState.growth.next_stage_xp) {
-                <small>Még {{ companionState.growth.xp_to_next_stage }} XP a következő fejlődésig.</small>
+              @if (companionState.growth.next_stage_points) {
+                <small>Még {{ companionState.growth.points_to_next_stage }} fejlődési pont, és új formát nyit meg.</small>
               } @else {
-                <small>Elérted a jelenlegi legmagasabb fejlődési szintet.</small>
+                <small>Elérted a jelenlegi legszebb Kódvirág-formát.</small>
               }
+            </div>
+
+            <div class="growth-sources">
+              <span><strong>{{ companionState.growth.knowledge_growth_points }}</strong> tudásból</span>
+              <span><strong>{{ companionState.growth.care_growth_points }}</strong> gondozásból</span>
             </div>
           </div>
 
           <div class="buddy-care-panel">
+            <div class="care-intro">
+              <span class="eyebrow">Állapot</span>
+              <h3>Gondoskodj róla</h3>
+              <p>A mutatók idővel lassan csökkennek. A virág nem hal meg, csak kókadozni kezd, ha régóta nem kap figyelmet.</p>
+            </div>
+
             <div class="meter-row">
               <div class="meter-copy">
                 <span>Víz</span>
                 <strong>{{ companionState.companion.water }}%</strong>
               </div>
-              <div class="meter-track"><span [style.width.%]="companionState.companion.water"></span></div>
+              <div class="meter-track water-meter"><span [style.width.%]="companionState.companion.water"></span></div>
             </div>
 
             <div class="meter-row">
@@ -105,7 +183,7 @@
                 <span>Jóllakottság</span>
                 <strong>{{ companionState.companion.hunger }}%</strong>
               </div>
-              <div class="meter-track"><span [style.width.%]="companionState.companion.hunger"></span></div>
+              <div class="meter-track food-meter"><span [style.width.%]="companionState.companion.hunger"></span></div>
             </div>
 
             <div class="meter-row">
@@ -113,7 +191,7 @@
                 <span>Kedv</span>
                 <strong>{{ companionState.companion.happiness }}%</strong>
               </div>
-              <div class="meter-track"><span [style.width.%]="companionState.companion.happiness"></span></div>
+              <div class="meter-track mood-meter"><span [style.width.%]="companionState.companion.happiness"></span></div>
             </div>
 
             <div class="care-actions">
@@ -123,7 +201,7 @@
                 (click)="careForCompanion('water')">
                 <span class="action-icon">💧</span>
                 <span>Öntözés</span>
-                <small>-{{ actionCost('water') }} pont</small>
+                <small>-{{ actionCost('water') }} pont · +{{ actionGrowth('water') }} növekedés</small>
               </button>
 
               <button
@@ -132,7 +210,7 @@
                 (click)="careForCompanion('feed')">
                 <span class="action-icon">🍎</span>
                 <span>Etetés</span>
-                <small>-{{ actionCost('feed') }} pont</small>
+                <small>-{{ actionCost('feed') }} pont · +{{ actionGrowth('feed') }} növekedés</small>
               </button>
 
               <button
@@ -141,7 +219,7 @@
                 (click)="careForCompanion('play')">
                 <span class="action-icon">✨</span>
                 <span>Játék</span>
-                <small>-{{ actionCost('play') }} pont</small>
+                <small>-{{ actionCost('play') }} pont · +{{ actionGrowth('play') }} növekedés</small>
               </button>
             </div>
 

@@ -23,6 +23,8 @@ export class Dashboard implements OnInit {
   notesLoading = true;
   companionLoading = true;
   companionAction: CompanionActionKey | null = null;
+  lastCompanionAction: CompanionActionKey | null = null;
+  buddyAnimating = false;
   companionMessage = '';
   companionError = '';
 
@@ -88,7 +90,9 @@ export class Dashboard implements OnInit {
       next: response => {
         this.companionState = response.state;
         this.companionMessage = response.message;
+        this.lastCompanionAction = action;
         this.companionAction = null;
+        this.triggerBuddyAnimation();
       },
       error: err => {
         this.companionError =
@@ -102,6 +106,27 @@ export class Dashboard implements OnInit {
 
   actionCost(action: CompanionActionKey): number {
     return this.companionState?.actions.find(item => item.key === action)?.cost ?? 0;
+  }
+
+  actionGrowth(action: CompanionActionKey): number {
+    return this.companionState?.actions.find(item => item.key === action)?.growth ?? 0;
+  }
+
+  actionIcon(action: CompanionActionKey | null): string {
+    if (action === 'water') return '💧';
+    if (action === 'feed') return '🍎';
+    if (action === 'play') return '✨';
+    return '';
+  }
+
+  private triggerBuddyAnimation(): void {
+    this.buddyAnimating = false;
+    setTimeout(() => {
+      this.buddyAnimating = true;
+      setTimeout(() => {
+        this.buddyAnimating = false;
+      }, 900);
+    });
   }
 
   deleteNote(note: Note): void {

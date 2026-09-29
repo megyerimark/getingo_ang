@@ -28,4 +28,24 @@ export class Categories implements OnInit {
       }
     });
   }
+
+  categoryShort(category: Category): string {
+    const value = category.name.toLowerCase();
+    if (value.includes('javascript')) return 'JS';
+    if (value.includes('html')) return 'HTML';
+    if (value.includes('css')) return 'CSS';
+    if (value.includes('angular')) return 'A';
+    if (value.includes('laravel')) return 'L';
+    return category.name.slice(0, 2).toUpperCase();
+  }
+
+  categoryTone(category: Category): string {
+    const value = `${category.name} ${category.slug}`.toLowerCase();
+    if (value.includes('javascript')) return 'javascript';
+    if (value.includes('html')) return 'html';
+    if (value.includes('css')) return 'css';
+    if (value.includes('angular')) return 'angular';
+    if (value.includes('laravel')) return 'laravel';
+    return 'default';
+  }
 }

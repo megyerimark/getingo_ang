@@ -1,93 +1,57 @@
 .runner {
-  margin-top: 20px;
-  border: 1px solid #ddd;
-  border-radius: 8px;
   overflow: hidden;
+  border-top: 1px solid rgba(255, 255, 255, .06);
+  background: #fff;
 }
 
-.runner-header {
+.runner-toolbar {
+  min-height: 48px;
   display: flex;
-  justify-content: space-between;
   align-items: center;
-  gap: 15px;
-  padding: 12px;
-  background: #f5f5f5;
-  border-bottom: 1px solid #ddd;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 9px 13px;
+  background: #0b203d;
+  color: #fff;
 }
 
-.mode-selector,
+.runner-title {
+  color: #b8c9e1;
+  font-size: .78rem;
+  font-weight: 800;
+}
+
 .runner-actions {
   display: flex;
   gap: 8px;
 }
 
-.mode-btn {
-  padding: 6px 12px;
-  border: 1px solid #ccc;
-  border-radius: 5px;
-  background: #fff;
+.runner-actions .btn-success {
+  border-color: #1677ff;
+  background: #1677ff;
 }
 
-.mode-btn.active {
-  background: #198754;
+.runner-actions .btn-outline-secondary {
+  border-color: rgba(255, 255, 255, .18);
+  color: #b9c9df;
+}
+
+.runner-actions .btn-outline-secondary:hover {
+  background: rgba(255, 255, 255, .08);
   color: #fff;
-  border-color: #198754;
-}
-
-.preview-title {
-  padding: 10px 15px;
-  font-weight: 600;
-  background: #fafafa;
-  border-bottom: 1px solid #ddd;
 }
 
 .preview-frame {
   display: block;
   width: 100%;
-  min-height: 300px;
+  min-height: 260px;
   border: 0;
   background: #fff;
 }
 
 @media (max-width: 600px) {
-  .runner-header {
+  .runner-toolbar {
     align-items: stretch;
     flex-direction: column;
   }
-
-  .mode-selector {
-    flex-wrap: wrap;
-  }
-}
-.runner {
-  margin-top: 20px;
-  overflow: hidden;
-  border: 1px solid #d5d5d5;
-  border-radius: 8px;
-}
-
-.runner-toolbar {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 12px 15px;
-  background: #282a35;
-  color: #fff;
-}
-
-.runner-title {
-  font-weight: 600;
-}
-
-.runner-actions {
-  display: flex;
-  gap: 8px;
-}
-
-.preview-frame {
-  display: block;
-  width: 100%;
-  min-height: 320px;
-  border: 0;
-  background: #fff;
 }

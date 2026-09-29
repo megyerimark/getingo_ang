@@ -1,100 +1,69 @@
-<nav class="navbar navbar-expand-lg navbar-dark">
-  <div class="container">
-    <a
-      class="navbar-brand fw-bold"
-      routerLink="/"
-      (click)="closeMenu()">
-      Getingo
+<nav class="site-navbar">
+  <div class="nav-shell">
+    <a class="brand" routerLink="/" (click)="closeMenu()" aria-label="Getingo főoldal">
+      <span class="brand-mark">G</span>
+      <span class="brand-name">Getingo</span>
     </a>
 
     <button
-      class="navbar-toggler"
+      class="menu-toggle"
       type="button"
       aria-label="Menü megnyitása"
       aria-controls="mainNavbar"
       [attr.aria-expanded]="isMenuOpen"
       (click)="toggleMenu()">
-      <span class="navbar-toggler-icon"></span>
+      <i class="bi" [class.bi-list]="!isMenuOpen" [class.bi-x-lg]="isMenuOpen"></i>
     </button>
 
-    <div
-      id="mainNavbar"
-      class="collapse navbar-collapse"
-      [class.show]="isMenuOpen">
+    <div id="mainNavbar" class="nav-content" [class.open]="isMenuOpen">
+      <div class="nav-links">
+        <a
+          routerLink="/"
+          routerLinkActive="active"
+          [routerLinkActiveOptions]="{ exact: true }"
+          (click)="closeMenu()">
+          Főoldal
+        </a>
 
-      <ul class="navbar-nav me-auto">
-        <li class="nav-item">
-          <a
-            class="nav-link"
-            routerLink="/"
-            routerLinkActive="active"
-            [routerLinkActiveOptions]="{ exact: true }"
-            (click)="closeMenu()">
-            Főoldal
-          </a>
-        </li>
+        <a routerLink="/categories" routerLinkActive="active" (click)="closeMenu()">
+          Tananyagok
+        </a>
 
-        <li class="nav-item">
-          <a
-            class="nav-link"
-            routerLink="/categories"
-            routerLinkActive="active"
-            (click)="closeMenu()">
-            Tananyagok
-          </a>
-        </li>
+        <a routerLink="/search" routerLinkActive="active" (click)="closeMenu()">
+          <i class="bi bi-search"></i>
+          Keresés
+        </a>
+      </div>
 
-        <li class="nav-item">
-          <a
-            class="nav-link"
-            routerLink="/search"
-            routerLinkActive="active"
-            (click)="closeMenu()">
-            Keresés
-          </a>
-        </li>
-      </ul>
-
-      <div class="navbar-actions">
+      <div class="nav-actions">
         @if (auth.currentUser(); as user) {
-          <span class="navbar-user">
-            {{ user.name }}
+          <span class="user-chip">
+            <span class="user-avatar">{{ user.name.charAt(0).toUpperCase() }}</span>
+            <span>{{ user.name }}</span>
           </span>
 
           @if (user.role === 'admin') {
-            <a
-              class="btn btn-warning btn-sm"
-              routerLink="/admin"
-              (click)="closeMenu()">
+            <a class="action-button ghost" routerLink="/admin" (click)="closeMenu()">
+              <i class="bi bi-grid"></i>
               Admin
             </a>
           } @else {
-            <a
-              class="btn btn-outline-light btn-sm"
-              routerLink="/dashboard"
-              (click)="closeMenu()">
+            <a class="action-button ghost" routerLink="/dashboard" (click)="closeMenu()">
+              <i class="bi bi-person"></i>
               Fiókom
             </a>
           }
 
-          <button
-            class="btn btn-danger btn-sm"
-            type="button"
-            (click)="logout()">
+          <button class="logout-button" type="button" (click)="logout()">
+            <i class="bi bi-box-arrow-right"></i>
             Kilépés
           </button>
         } @else {
-          <a
-            class="btn btn-outline-light btn-sm"
-            routerLink="/login"
-            (click)="closeMenu()">
+          <a class="action-button ghost" routerLink="/login" (click)="closeMenu()">
             Belépés
           </a>
 
-          <a
-            class="btn btn-success btn-sm"
-            routerLink="/register"
-            (click)="closeMenu()">
+          <a class="action-button primary" routerLink="/register" (click)="closeMenu()">
             Regisztráció
           </a>
         }
