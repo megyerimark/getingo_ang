@@ -5,17 +5,65 @@
 } @else {
   <div class="lesson-layout">
     <aside class="lesson-sidebar">
-      <div class="sidebar-title">Tananyag</div>
+      @if (curriculum) {
+        <div class="course-summary">
+          <a class="course-back" routerLink="/categories">
+            <i class="bi bi-arrow-left"></i> Tananyagok
+          </a>
 
-      @for (lesson of lessons; track lesson.id) {
-        <button
-          class="lesson-link"
-          type="button"
-          [class.active]="activeLesson?.id === lesson.id"
-          (click)="selectLesson(lesson)">
-          {{ lesson.title }}
-        </button>
+          <div class="course-kicker">Fő kategória</div>
+          <h2>{{ curriculum.category.name }}</h2>
+
+          <div class="course-progress-row">
+            <span>{{ curriculum.progress.completed }} / {{ curriculum.progress.total }} lecke</span>
+            <strong>{{ curriculum.progress.percentage }}%</strong>
+          </div>
+          <div class="course-progress-track">
+            <div class="course-progress-value" [style.width.%]="curriculum.progress.percentage"></div>
+          </div>
+        </div>
       }
+
+      <div class="curriculum-nav">
+        @for (section of sections; track section.id) {
+          <div class="curriculum-section" [class.open]="isSectionOpen(section.id)">
+            <button class="section-toggle" type="button" (click)="toggleSection(section.id)">
+              <span class="section-chevron">
+                <i class="bi" [class.bi-chevron-down]="isSectionOpen(section.id)" [class.bi-chevron-right]="!isSectionOpen(section.id)"></i>
+              </span>
+              <span class="section-copy">
+                <strong>{{ section.name }}</strong>
+                <small>{{ sectionCompleted(section) }} / {{ section.lessons.length }} kész</small>
+              </span>
+              @if (section.progress.total > 0 && sectionCompleted(section) === section.progress.total) {
+                <i class="bi bi-check-circle-fill section-done"></i>
+              }
+            </button>
+
+            @if (isSectionOpen(section.id)) {
+              <div class="section-lessons">
+                @for (lesson of section.lessons; track lesson.id) {
+                  <button
+                    class="lesson-link"
+                    type="button"
+                    [class.active]="activeLesson?.id === lesson.id"
+                    [class.completed]="isLessonCompleted(lesson)"
+                    (click)="selectLesson(lesson)">
+                    <span class="lesson-status">
+                      @if (isLessonCompleted(lesson)) {
+                        <i class="bi bi-check-circle-fill"></i>
+                      } @else {
+                        <i class="bi bi-circle"></i>
+                      }
+                    </span>
+                    <span>{{ lesson.title }}</span>
+                  </button>
+                }
+              </div>
+            }
+          </div>
+        }
+      </div>
     </aside>
 
     <main class="lesson-main">
@@ -33,6 +81,13 @@
 
       @if (activeLesson) {
         <article class="lesson-article">
+          @if (curriculum) {
+            <div class="lesson-breadcrumb">
+              <span>{{ curriculum.category.name }}</span>
+              <i class="bi bi-chevron-right"></i>
+              <span>{{ getActiveSectionName() }}</span>
+            </div>
+          }
           <h1>{{ activeLesson.title }}</h1>
 
           <div class="lesson-text">

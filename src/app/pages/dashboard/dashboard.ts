@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ViewChild } from '@angular/core';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
 import { finalize } from 'rxjs';
@@ -11,17 +11,24 @@ import {
   CompanionState
 } from '../../core/models/companion.model';
 import { CompanionService } from '../../services/companion';
+import { DashboardService } from '../../services/dashboard';
+import { DashboardLearningData, DailyGoal, LearningPathItem } from '../../core/models/dashboard.model';
+import { Buddy3D } from '../../shared/buddy-3d/buddy-3d';
 
 @Component({
   selector: 'app-dashboard',
-  imports: [ReactiveFormsModule, RouterLink],
+  imports: [ReactiveFormsModule, RouterLink, Buddy3D],
   templateUrl: './dashboard.html',
   styleUrl: './dashboard.scss'
 })
 export class Dashboard implements OnInit {
+  @ViewChild(Buddy3D) buddy3d?: Buddy3D;
   user: User | null = null;
   notes: Note[] = [];
   companionState: CompanionState | null = null;
+  learningData: DashboardLearningData | null = null;
+  learningLoading = true;
+  learningError = '';
   isLoading = true;
   notesLoading = true;
   companionLoading = true;
@@ -50,11 +57,13 @@ export class Dashboard implements OnInit {
     private accountService: AccountService,
     private router: Router,
     private noteService: NoteService,
-    private companionService: CompanionService
+    private companionService: CompanionService,
+    private dashboardService: DashboardService
   ) {}
 
   ngOnInit(): void {
     this.loadUser();
+    this.loadLearningDashboard();
     this.loadNotes();
     this.loadCompanion();
   }
@@ -69,6 +78,69 @@ export class Dashboard implements OnInit {
         this.isLoading = false;
       }
     });
+  }
+
+  loadLearningDashboard(): void {
+    this.learningLoading = true;
+    this.learningError = '';
+
+    this.dashboardService.getLearningDashboard().subscribe({
+      next: data => {
+        this.learningData = data;
+        this.learningLoading = false;
+
+        if (this.user) {
+          this.user.current_streak = data.user.current_streak;
+          this.user.longest_streak = data.user.longest_streak;
+          this.user.xp_points = data.user.xp_points;
+        }
+      },
+      error: () => {
+        this.learningError = 'A tanulási útvonal most nem tölthető be.';
+        this.learningLoading = false;
+      }
+    });
+  }
+
+  greeting(): string {
+    const hour = new Date().getHours();
+    if (hour < 10) return 'Jó reggelt';
+    if (hour < 18) return 'Szia';
+    return 'Jó estét';
+  }
+
+  firstName(): string {
+    return (this.user?.name ?? '').trim().split(/\s+/)[0] || 'Tanuló';
+  }
+
+  dailyGoalIcon(goal: DailyGoal): string {
+    if (goal.key === 'lesson') return 'bi-book-half';
+    if (goal.key === 'quiz') return 'bi-patch-question-fill';
+    return 'bi-code-square';
+  }
+
+  dailyGoalRoute(goal: DailyGoal): string | any[] {
+    const match = goal.url.match(/^\/categories\/(\d+)\/lessons/);
+    if (match) {
+      return ['/categories', Number(match[1]), 'lessons'];
+    }
+
+    return goal.url;
+  }
+
+  dailyGoalQueryParams(goal: DailyGoal): Record<string, number> | null {
+    const match = goal.url.match(/[?&]lesson=(\d+)/);
+    return match ? { lesson: Number(match[1]) } : null;
+  }
+
+  pathIcon(item: LearningPathItem): string {
+    const value = `${item.name} ${item.slug}`.toLowerCase();
+    if (value.includes('javascript')) return 'JS';
+    if (value.includes('html')) return 'HTML';
+    if (value.includes('css')) return 'CSS';
+    if (value.includes('angular')) return 'A';
+    if (value.includes('laravel')) return 'L';
+    return item.name.slice(0, 2).toUpperCase();
   }
 
   loadNotes(): void {
@@ -111,6 +183,7 @@ export class Dashboard implements OnInit {
         this.lastCompanionAction = action;
         this.companionAction = null;
         this.triggerBuddyAnimation();
+        setTimeout(() => this.buddy3d?.playAction(action));
       },
       error: err => {
         this.companionError =

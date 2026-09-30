@@ -23,6 +23,25 @@ export const routes: Routes = [
         .then(m => m.Register)
   },
   {
+    path: 'adatkezelesi-tajekoztato',
+    loadComponent: () =>
+      import('./pages/privacy/privacy')
+        .then(m => m.Privacy)
+  },
+  {
+    path: 'premium',
+    loadComponent: () =>
+      import('./pages/premium/premium')
+        .then(m => m.Premium)
+  },
+  {
+    path: 'premium/siker',
+    canActivate: [authGuard],
+    loadComponent: () =>
+      import('./pages/premium-success/premium-success')
+        .then(m => m.PremiumSuccess)
+  },
+  {
     path: 'verify-email',
     canActivate: [authGuard],
     loadComponent: () =>
@@ -61,11 +80,25 @@ export const routes: Routes = [
         .then(m => m.Dashboard)
   },
   {
+    path: 'buddy',
+    canActivate: [authGuard, verifiedGuard],
+    loadComponent: () =>
+      import('./pages/buddy/buddy')
+        .then(m => m.Buddy)
+  },
+  {
     path: 'projects',
     canActivate: [authGuard, verifiedGuard],
     loadComponent: () =>
       import('./pages/projects/projects')
         .then(m => m.Projects)
+  },
+  {
+    path: 'portfolio',
+    canActivate: [authGuard, verifiedGuard],
+    loadComponent: () =>
+      import('./pages/portfolio/portfolio')
+        .then(m => m.Portfolio)
   },
   {
     path: 'projects/:id',
@@ -134,6 +167,18 @@ export const routes: Routes = [
         loadComponent: () =>
           import('./pages/admin/admin-users/admin-users')
             .then(m => m.AdminUsers)
+      },
+      {
+        path: 'subscriptions',
+        loadComponent: () =>
+          import('./pages/admin/admin-subscriptions/admin-subscriptions')
+            .then(m => m.AdminSubscriptions)
+      },
+      {
+        path: 'revenue',
+        loadComponent: () =>
+          import('./pages/admin/admin-revenue/admin-revenue')
+            .then(m => m.AdminRevenue)
       },
       {
         path: 'audit-logs',

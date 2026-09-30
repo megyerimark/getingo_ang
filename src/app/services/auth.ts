@@ -27,6 +27,7 @@ export class Auth {
     email: string;
     password: string;
     password_confirmation: string;
+    privacy_accepted: boolean;
   }): Observable<AuthResponse> {
     return this.csrf().pipe(
       switchMap(() =>

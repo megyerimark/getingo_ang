@@ -5,6 +5,7 @@ import { environment } from '../../environments/environment';
 import {
   CompanionActionKey,
   CompanionActionResponse,
+  BuddyRoomKey,
   CompanionState
 } from '../core/models/companion.model';
 
@@ -18,6 +19,12 @@ export class CompanionService {
 
   getState(): Observable<CompanionState> {
     return this.http.get<CompanionState>(`${this.apiUrl}/companion`, {
+      withCredentials: true
+    });
+  }
+
+  updatePreferences(data: { room?: BuddyRoomKey; skin?: string }): Observable<CompanionState> {
+    return this.http.patch<CompanionState>(`${this.apiUrl}/companion/preferences`, data, {
       withCredentials: true
     });
   }

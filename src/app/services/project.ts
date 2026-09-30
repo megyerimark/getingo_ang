@@ -2,6 +2,7 @@ import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable, map } from 'rxjs';
 import { environment } from '../../environments/environment';
+import { PortfolioResponse } from '../core/models/portfolio.model';
 import {
   Project,
   ProjectCheckPayload,
@@ -25,6 +26,12 @@ export class ProjectService {
     }).pipe(
       map(response => response.projects)
     );
+  }
+
+  getPortfolio(): Observable<PortfolioResponse> {
+    return this.http.get<PortfolioResponse>(`${this.apiUrl}/portfolio`, {
+      withCredentials: true
+    });
   }
 
   getById(id: number): Observable<ProjectResponse> {

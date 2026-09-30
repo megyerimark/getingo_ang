@@ -33,19 +33,33 @@
           <a routerLink="/projects" routerLinkActive="active" (click)="closeMenu()">
             Projektek
           </a>
+          <a routerLink="/portfolio" routerLinkActive="active" (click)="closeMenu()">
+            Portfólió
+          </a>
+          <a routerLink="/buddy" routerLinkActive="active" (click)="closeMenu()">
+            <i class="bi bi-stars"></i> Buddy 3D
+          </a>
         }
 
         <a routerLink="/search" routerLinkActive="active" (click)="closeMenu()">
           <i class="bi bi-search"></i>
           Keresés
         </a>
+
+        <a class="premium-nav-link" routerLink="/premium" routerLinkActive="active" (click)="closeMenu()">
+          <i class="bi bi-stars"></i>
+          Premium
+        </a>
       </div>
 
       <div class="nav-actions">
         @if (auth.currentUser(); as user) {
-          <span class="user-chip">
+          <span class="user-chip" [class.premium-user-chip]="user.is_premium">
             <span class="user-avatar">{{ user.name.charAt(0).toUpperCase() }}</span>
             <span>{{ user.name }}</span>
+            @if (user.is_premium) {
+              <span class="premium-mini-badge"><i class="bi bi-stars"></i> PRO</span>
+            }
           </span>
 
           @if (!user.email_verified_at) {

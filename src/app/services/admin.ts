@@ -1,14 +1,17 @@
 import { Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpParams } from '@angular/common/http';
 import { map, Observable } from 'rxjs';
 import { Category } from '../core/models/category.model';
 import { environment } from '../../environments/environment';
 import {
   AdminExercise,
   AdminLesson,
+  AdminLessonSection,
   AdminProject,
   AdminQuiz,
   AdminStats,
+  AdminSubscriptionResponse,
+  AdminRevenueResponse,
   AdminUser,
   AuditLog
 } from '../core/models/admin.model';
@@ -64,6 +67,30 @@ export class AdminService {
 
   deleteCategory(id: number): Observable<any> {
     return this.http.delete(`${this.apiUrl}/categories/${id}`);
+  }
+
+  getLessonSections(categoryId?: number): Observable<AdminLessonSection[]> {
+    let params = new HttpParams();
+    if (categoryId) params = params.set('category_id', categoryId);
+
+    return this.http.get<any>(`${this.apiUrl}/lesson-sections`, { params }).pipe(
+      map(response => this.unwrap<AdminLessonSection>(response))
+    );
+  }
+
+  createLessonSection(data: Omit<AdminLessonSection, 'id' | 'lessons_count' | 'category'>): Observable<any> {
+    return this.http.post(`${this.apiUrl}/lesson-sections`, data);
+  }
+
+  updateLessonSection(
+    id: number,
+    data: Omit<AdminLessonSection, 'id' | 'lessons_count' | 'category'>
+  ): Observable<any> {
+    return this.http.put(`${this.apiUrl}/lesson-sections/${id}`, data);
+  }
+
+  deleteLessonSection(id: number): Observable<any> {
+    return this.http.delete(`${this.apiUrl}/lesson-sections/${id}`);
   }
 
   getLessons(): Observable<AdminLesson[]> {
@@ -148,6 +175,24 @@ export class AdminService {
 
   deleteQuiz(id: number): Observable<any> {
     return this.http.delete(`${this.apiUrl}/quizzes/${id}`);
+  }
+
+
+
+  getSubscriptions(search = '', status = 'all'): Observable<AdminSubscriptionResponse> {
+    let params = new HttpParams().set('status', status);
+    if (search.trim()) params = params.set('search', search.trim());
+    return this.http.get<AdminSubscriptionResponse>(`${this.apiUrl}/subscriptions`, { params });
+  }
+
+  getRevenue(months = 12): Observable<AdminRevenueResponse> {
+    return this.http.get<AdminRevenueResponse>(`${this.apiUrl}/revenue`, {
+      params: new HttpParams().set('months', months)
+    });
+  }
+
+  syncStripeRevenue(): Observable<{ message: string; synced: number }> {
+    return this.http.post<{ message: string; synced: number }>(`${this.apiUrl}/revenue/sync`, {});
   }
 
   getAuditLogs(): Observable<AuditLog[]> {

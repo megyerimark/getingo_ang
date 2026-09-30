@@ -9,6 +9,7 @@ import {
 import { ProjectService } from '../../services/project';
 
 type EditorTab = 'html' | 'css' | 'javascript' | 'console';
+type MentorTone = 'idle' | 'tip' | 'warning' | 'success';
 
 interface RunnerMessage {
   source: 'getingo-project-runner';
@@ -44,7 +45,13 @@ export class ProjectDetail implements OnInit {
   running = false;
   checking = false;
 
+  mentorOpen = false;
+  mentorHint = 'Futtasd a kódot, majd kérj segítséget. A Mentor nem adja oda a kész megoldást, hanem rávezet a hibára.';
+  mentorTone: MentorTone = 'idle';
+  mentorAnalyzing = false;
+
   private pendingCheck = false;
+  private pendingMentor = false;
   private runnerToken = '';
 
   constructor(
@@ -110,11 +117,12 @@ export class ProjectDetail implements OnInit {
     });
   }
 
-  runProject(checkAfterRun = false): void {
+  runProject(checkAfterRun = false, mentorAfterRun = false): void {
     if (!this.project || !this.previewFrame) return;
 
     this.runnerToken = this.createRunnerToken();
     this.pendingCheck = checkAfterRun;
+    this.pendingMentor = mentorAfterRun;
     this.consoleOutput = [];
     this.checkMessage = checkAfterRun ? 'A megoldás futtatása és ellenőrzése...' : '';
     this.checkPassed = null;
@@ -139,6 +147,16 @@ export class ProjectDetail implements OnInit {
     this.runProject(true);
   }
 
+  askMentor(): void {
+    if (!this.project || this.running) return;
+
+    this.mentorOpen = true;
+    this.mentorAnalyzing = true;
+    this.mentorTone = 'idle';
+    this.mentorHint = 'Átnézem a futási eredményt és keresek egy olyan nyomot, ami közelebb visz a megoldáshoz...';
+    this.runProject(false, true);
+  }
+
   resetToStarter(): void {
     if (!this.project) return;
     if (!confirm('Visszaállítod a szerkesztőt az admin által megadott kezdőkódra?')) return;
@@ -149,6 +167,8 @@ export class ProjectDetail implements OnInit {
     this.consoleOutput = [];
     this.checkMessage = '';
     this.checkPassed = null;
+    this.mentorTone = 'idle';
+    this.mentorHint = 'A kezdőkód visszaállt. Futtasd, majd ha elakadsz, kérdezd meg a Mentort.';
     this.runProject();
   }
 
@@ -165,6 +185,12 @@ export class ProjectDetail implements OnInit {
 
     this.running = false;
 
+    if (this.pendingMentor) {
+      this.pendingMentor = false;
+      this.mentorAnalyzing = false;
+      this.generateMentorHint();
+    }
+
     if (this.pendingCheck) {
       this.pendingCheck = false;
       this.sendCheck();
@@ -175,6 +201,13 @@ export class ProjectDetail implements OnInit {
     return this.project?.validation_type === 'console_contains'
       ? 'Elvárt konzolsorok'
       : 'Pontos konzolkimenet';
+  }
+
+  mentorIcon(): string {
+    if (this.mentorTone === 'warning') return 'bi-exclamation-triangle-fill';
+    if (this.mentorTone === 'success') return 'bi-check-circle-fill';
+    if (this.mentorTone === 'tip') return 'bi-lightbulb-fill';
+    return 'bi-stars';
   }
 
   private sendCheck(): void {
@@ -201,7 +234,89 @@ export class ProjectDetail implements OnInit {
 
     if (response.passed && this.project) {
       this.project.is_completed = true;
+      this.mentorOpen = true;
+      this.mentorTone = 'success';
+      this.mentorHint = response.already_completed
+        ? 'A megoldás továbbra is átmegy az ellenőrzésen. Most már próbáld meg egyszerűsíteni vagy szebben strukturálni a kódot.'
+        : 'Sikerült. Nézd meg, melyik gondolat volt a kulcs, mert ezt a mintát később más feladatoknál is használni fogod.';
+      return;
     }
+
+    if (!response.passed) {
+      this.mentorOpen = true;
+      this.generateMentorHint(true);
+    }
+  }
+
+  private generateMentorHint(validationFailed = false): void {
+    const errorLine = this.consoleOutput.find(line => line.startsWith('HIBA:')) ?? '';
+    const lowerError = errorLine.toLowerCase();
+    const js = this.javascriptCode;
+    const html = this.htmlCode;
+
+    this.mentorOpen = true;
+
+    if (!js.trim() && !html.trim()) {
+      this.mentorTone = 'warning';
+      this.mentorHint = 'A szerkesztő még üres. Indulj el a feladatleírás első konkrét lépésével, majd futtasd újra.';
+      return;
+    }
+
+    if (lowerError.includes('is not defined')) {
+      this.mentorTone = 'warning';
+      this.mentorHint = 'A JavaScript egy olyan névre hivatkozik, amit nem talál. Ellenőrizd, hogy a változót létrehoztad-e a használata előtt, és pontosan ugyanúgy írtad-e a nevét.';
+      return;
+    }
+
+    if (lowerError.includes('assignment to constant variable')) {
+      this.mentorTone = 'warning';
+      this.mentorHint = 'Egy const változónak új értéket próbálsz adni. Ha a feladat szerint később módosítani kell az értéket, gondold át, hogy inkább let legyen-e.';
+      return;
+    }
+
+    if (
+      lowerError.includes('unexpected token') ||
+      lowerError.includes('unexpected end') ||
+      lowerError.includes('missing') ||
+      lowerError.includes('syntax')
+    ) {
+      this.mentorTone = 'warning';
+      this.mentorHint = 'Szintaktikai hibának tűnik. Nézd végig a zárójeleket, idézőjeleket és kapcsos zárójeleket azon a részen, amit legutóbb módosítottál.';
+      return;
+    }
+
+    if (lowerError.includes('cannot read properties of null') || lowerError.includes('cannot read property')) {
+      this.mentorTone = 'warning';
+      this.mentorHint = 'A kód valószínűleg olyan HTML-elemet keres, amit nem talált meg. Ellenőrizd az id/class nevet és azt, hogy az elem valóban szerepel-e a HTML-ben.';
+      return;
+    }
+
+    if (errorLine) {
+      this.mentorTone = 'warning';
+      this.mentorHint = `A futás hibát jelzett: „${errorLine.replace(/^HIBA:\s*/i, '')}”. A hibaüzenet kulcsszavait keresd meg abban a sorban, amelyet legutóbb módosítottál.`;
+      return;
+    }
+
+    if (!js.includes('console.log') && this.project?.validation_type?.startsWith('console')) {
+      this.mentorTone = 'tip';
+      this.mentorHint = 'Ez a projekt konzolkimenetet ellenőriz, de a JavaScriptben nem látok console.log() hívást. Nézd meg, mely értékeket kér kiírni a feladat.';
+      return;
+    }
+
+    if (validationFailed) {
+      this.mentorTone = 'tip';
+      this.mentorHint = 'A program lefutott, tehát most inkább logikai eltérés van. Ellenőrizd a kiírt értékek sorrendjét, a felesleges console.log() sorokat és azt, hogy minden kért módosítás megtörtént-e.';
+      return;
+    }
+
+    if (this.consoleOutput.length > 0) {
+      this.mentorTone = 'success';
+      this.mentorHint = 'A kód hibamentesen lefutott. Ha az ellenőrzés mégsem sikerül, a következő lépés a kimenet sorrendjének és a feladat pontos követelményeinek összevetése.';
+      return;
+    }
+
+    this.mentorTone = 'tip';
+    this.mentorHint = 'Nem látok futási hibát, de konzolkimenet sincs. Menj végig a feladaton lépésenként, és minden fontos köztes értéket írj ki ideiglenesen a konzolra.';
   }
 
   private workspacePayload(): ProjectWorkspacePayload {

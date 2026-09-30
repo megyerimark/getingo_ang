@@ -162,6 +162,7 @@
 .toolbar-actions button:hover:not(:disabled) { transform: translateY(-1px); }
 .toolbar-actions button:disabled { opacity: 0.55; cursor: not-allowed; }
 .secondary-button { color: #405777; background: #edf2f8; }
+.mentor-button { color: #2351a5; background: linear-gradient(135deg, #e9f2ff, #f4edff); border: 1px solid #d7e5ff !important; }
 .run-button { color: #fff; background: #172a4d; }
 .check-button { color: #fff; background: linear-gradient(135deg, #245fdd, #498cff); }
 
@@ -274,4 +275,81 @@ textarea:focus { box-shadow: inset 0 0 0 2px rgba(78, 135, 238, 0.55); }
   .toolbar-actions button { flex: 1 1 calc(50% - 8px); justify-content: center; }
   textarea, .console-panel { min-height: 340px; }
   .preview-frame { min-height: 340px; }
+}
+
+
+.mentor-intro {
+  display: flex;
+  gap: 14px;
+  margin-top: 20px;
+  padding: 17px;
+  border: 1px solid #dcdcff;
+  border-radius: 18px;
+  background: linear-gradient(135deg, #f8f7ff, #f1f7ff);
+}
+
+.mentor-intro > i {
+  color: #6857e8;
+  font-size: 1.35rem;
+}
+
+.mentor-intro strong { color: #243461; }
+.mentor-intro p { margin: 4px 0 0; color: #68758e; line-height: 1.55; }
+
+.mentor-card {
+  display: flex;
+  gap: 14px;
+  margin-top: 14px;
+  padding: 16px;
+  border: 1px solid #dbe5ff;
+  border-radius: 16px;
+  background:
+    radial-gradient(circle at 0 0, rgba(107, 96, 255, .12), transparent 42%),
+    #f8faff;
+  box-shadow: 0 12px 26px rgba(73, 87, 157, .08);
+}
+
+.mentor-card.warning {
+  border-color: #f0d6a4;
+  background: #fffaf0;
+}
+
+.mentor-card.success {
+  border-color: #caeadb;
+  background: #f2fbf7;
+}
+
+.mentor-avatar {
+  width: 42px;
+  height: 42px;
+  display: grid;
+  place-items: center;
+  flex: 0 0 auto;
+  border-radius: 13px;
+  color: #fff;
+  background: linear-gradient(135deg, #326fe9, #7759e7);
+  box-shadow: 0 8px 20px rgba(66, 88, 210, .22);
+}
+
+.mentor-title-row {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 9px;
+}
+
+.mentor-title-row strong { color: #1a2d53; }
+.mentor-title-row span {
+  padding: 4px 7px;
+  border-radius: 999px;
+  color: #697896;
+  background: rgba(255, 255, 255, .75);
+  font-size: .7rem;
+  font-weight: 800;
+}
+
+.mentor-card p {
+  margin: 5px 0 0;
+  color: #5d6d87;
+  line-height: 1.6;
 }

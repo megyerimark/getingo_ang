@@ -1,4 +1,4 @@
-<h1 class="mb-4">Kategóriák</h1>
+<h1 class="mb-4">Fő kategóriák</h1>
 
 @if (message) {
   <div class="alert alert-success">{{ message }}</div>
@@ -10,7 +10,7 @@
 
 <div class="card mb-4">
   <div class="card-body">
-    <h4 class="mb-3">{{ editingId ? 'Kategória szerkesztése' : 'Új kategória' }}</h4>
+    <h4 class="mb-3">{{ editingId ? 'Fő kategória szerkesztése' : 'Új fő kategória' }}</h4>
 
     <form [formGroup]="form" (ngSubmit)="save()">
       <div class="row g-3">
@@ -62,6 +62,7 @@
         <th>Sorrend</th>
         <th>Név</th>
         <th>Slug</th>
+        <th>Fejezetek</th>
         <th>Leckék</th>
         <th>Feladatok</th>
         <th>Műveletek</th>
@@ -74,6 +75,7 @@
           <td>{{ category.sort_order }}</td>
           <td><strong>{{ category.name }}</strong></td>
           <td><code>{{ category.slug }}</code></td>
+          <td>{{ category.lesson_sections_count ?? 0 }}</td>
           <td>{{ category.lessons_count ?? 0 }}</td>
           <td>{{ category.exercises_count ?? 0 }}</td>
           <td>
@@ -83,7 +85,7 @@
         </tr>
       } @empty {
         <tr>
-          <td colspan="6" class="text-center text-secondary py-4">Még nincs kategória.</td>
+          <td colspan="7" class="text-center text-secondary py-4">Még nincs kategória.</td>
         </tr>
       }
     </tbody>

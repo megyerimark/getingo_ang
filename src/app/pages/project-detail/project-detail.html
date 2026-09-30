@@ -44,6 +44,14 @@
             </div>
           </div>
 
+          <div class="mentor-intro">
+            <i class="bi bi-stars"></i>
+            <div>
+              <strong>Elakadtál? Kérdezd a Getingo Mentort.</strong>
+              <p>A saját futási hibádból ad célzott tippet úgy, hogy közben nem mutatja meg a kész megoldást.</p>
+            </div>
+          </div>
+
           <div class="privacy-note">
             <i class="bi bi-shield-check"></i>
             <div>
@@ -69,6 +77,9 @@
               <button type="button" class="run-button" (click)="runProject()" [disabled]="running">
                 <i class="bi bi-play-fill"></i> {{ running ? 'Fut...' : 'Futtatás' }}
               </button>
+              <button type="button" class="mentor-button" (click)="askMentor()" [disabled]="running || mentorAnalyzing">
+                <i class="bi bi-stars"></i> {{ mentorAnalyzing ? 'Elemzés...' : 'Miért nem működik?' }}
+              </button>
               <button type="button" class="check-button" (click)="checkProject()" [disabled]="checking || running">
                 <i class="bi bi-patch-check"></i> {{ checking ? 'Ellenőrzés...' : 'Ellenőrzés' }}
               </button>
@@ -84,6 +95,19 @@
               <i class="bi" [class.bi-check-circle-fill]="checkPassed === true" [class.bi-lightbulb]="checkPassed !== true"></i>
               {{ checkMessage }}
             </div>
+          }
+
+          @if (mentorOpen) {
+            <aside class="mentor-card" [class.warning]="mentorTone === 'warning'" [class.success]="mentorTone === 'success'">
+              <div class="mentor-avatar"><i [class]="'bi ' + mentorIcon()"></i></div>
+              <div>
+                <div class="mentor-title-row">
+                  <strong>Getingo Mentor</strong>
+                  <span>rávezet, nem megold helyetted</span>
+                </div>
+                <p>{{ mentorHint }}</p>
+              </div>
+            </aside>
           }
 
           <div class="editor-tabs" role="tablist" aria-label="Projekt szerkesztő">

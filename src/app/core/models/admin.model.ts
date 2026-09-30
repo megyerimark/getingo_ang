@@ -46,9 +46,22 @@ export interface AdminUser {
   created_at: string;
 }
 
+export interface AdminLessonSection {
+  id: number;
+  category_id: number;
+  name: string;
+  slug: string;
+  description?: string | null;
+  sort_order: number;
+  lessons_count?: number;
+  category?: { id: number; name: string };
+}
+
 export interface AdminLesson {
   id: number;
   category_id: number;
+  lesson_section_id: number;
+  sort_order: number;
   title: string;
   slug: string;
   content: string;
@@ -56,6 +69,7 @@ export interface AdminLesson {
   example_html?: string | null;
   example_css?: string | null;
   example_javascript?: string | null;
+  section?: { id: number; category_id: number; name: string; slug: string; sort_order: number } | null;
 }
 
 export interface AdminQuiz {
@@ -103,4 +117,71 @@ export interface AuditLog {
   metadata?: Record<string, unknown> | string | null;
   ip_address?: string | null;
   created_at: string;
+}
+
+export interface AdminSubscriptionSummary {
+  total: number;
+  active: number;
+  trialing: number;
+  past_due: number;
+  canceled: number;
+}
+
+export interface AdminSubscription {
+  id: number;
+  name: string;
+  email: string;
+  plan: 'free' | 'premium';
+  is_premium: boolean;
+  status: string | null;
+  billing_cycle: 'monthly' | 'yearly' | null;
+  current_period_end: string | null;
+  premium_started_at: string | null;
+  stripe_customer_id: string | null;
+  stripe_subscription_id: string | null;
+  created_at: string;
+}
+
+export interface AdminSubscriptionResponse {
+  summary: AdminSubscriptionSummary;
+  subscriptions: AdminSubscription[];
+}
+
+export interface AdminRevenueMonth {
+  key: string;
+  label: string;
+  amount: number;
+  payments: number;
+}
+
+export interface AdminRevenuePayment {
+  id: number;
+  user: { id: number; name: string; email: string } | null;
+  status: string;
+  amount_paid: number;
+  currency: string;
+  billing_reason: string | null;
+  paid_at: string | null;
+  hosted_invoice_url: string | null;
+}
+
+export interface AdminRevenueResponse {
+  summary: {
+    total_revenue: number;
+    current_month_revenue: number;
+    previous_month_revenue: number;
+    month_growth_percentage: number;
+    mrr: number;
+    active_subscriptions: number;
+    successful_payments: number;
+    failed_payments: number;
+    currency: string;
+  };
+  plans: {
+    monthly: { active: number; unit_amount: number | null };
+    yearly: { active: number; unit_amount: number | null };
+  };
+  monthly: AdminRevenueMonth[];
+  recent_payments: AdminRevenuePayment[];
+  last_synced_payment_at: string | null;
 }

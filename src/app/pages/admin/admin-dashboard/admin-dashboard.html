@@ -260,6 +260,42 @@
       </div>
     </section>
 
+    <section class="dashboard-section business-overview">
+      <div class="section-heading">
+        <div>
+          <span class="section-eyebrow">Üzlet</span>
+          <h2>Előfizetések és bevételek</h2>
+        </div>
+
+        <div class="business-links">
+          <a class="panel-link" routerLink="/admin/subscriptions">Előfizetések</a>
+          <a class="panel-link" routerLink="/admin/revenue">Bevételek</a>
+        </div>
+      </div>
+
+      <div class="business-grid">
+        <a class="business-card premium-card" routerLink="/admin/subscriptions">
+          <div class="business-icon"><i class="bi bi-credit-card"></i></div>
+          <div>
+            <span>Aktív Premium előfizetések</span>
+            <strong>{{ subscriptions?.summary?.active ?? 0 }}</strong>
+            <small>{{ subscriptions?.summary?.past_due ?? 0 }} fizetési probléma • {{ subscriptions?.summary?.canceled ?? 0 }} lemondott</small>
+          </div>
+          <i class="bi bi-arrow-up-right business-arrow"></i>
+        </a>
+
+        <a class="business-card revenue-card" routerLink="/admin/revenue">
+          <div class="business-icon"><i class="bi bi-graph-up-arrow"></i></div>
+          <div>
+            <span>Aktuális havi bevétel</span>
+            <strong>{{ money(revenue?.summary?.current_month_revenue) }}</strong>
+            <small>MRR: {{ money(revenue?.summary?.mrr) }} • {{ revenue?.summary?.successful_payments ?? 0 }} sikeres befizetés</small>
+          </div>
+          <i class="bi bi-arrow-up-right business-arrow"></i>
+        </a>
+      </div>
+    </section>
+
     <section class="dashboard-content-grid">
       <div class="dashboard-panel performance-panel">
         <div class="panel-header">

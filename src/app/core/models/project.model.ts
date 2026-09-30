@@ -53,4 +53,13 @@ export interface ProjectCheckResponse {
   is_completed: boolean;
   xp_points?: number;
   console_output?: string[];
+  unlocked_achievements?: ProjectUnlockedAchievement[];
+}
+
+export interface ProjectUnlockedAchievement {
+  slug: string;
+  title: string;
+  description: string;
+  icon: string;
+  unlocked_at: string;
 }

@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
-import { Lesson } from '../../core/models/lesson.model';
+import { Lesson, LessonCurriculum, LessonSection } from '../../core/models/lesson.model';
 import { LessonService } from '../../services/lesson';
 import { Note, NoteService } from '../../services/note';
 import { FavoriteService } from '../../services/favorite';
@@ -19,6 +19,9 @@ import { LessonQuiz } from '../../shared/lesson-quiz/lesson-quiz';
 })
 export class Lessons implements OnInit {
   lessons: Lesson[] = [];
+  curriculum: LessonCurriculum | null = null;
+  sections: LessonSection[] = [];
+  openSectionIds = new Set<number>();
   notes: Note[] = [];
   activeLesson: Lesson | null = null;
   activeNote: Note | null = null;
@@ -60,17 +63,29 @@ export class Lessons implements OnInit {
       return;
     }
 
-    this.lessonService.getByCategory(categoryId).subscribe({
-      next: lessons => {
-        this.lessons = lessons;
+    this.lessonService.getCurriculum(categoryId).subscribe({
+      next: curriculum => {
+        this.curriculum = curriculum;
+        this.sections = curriculum.sections;
+        this.lessons = curriculum.sections.flatMap(section => section.lessons);
 
         const lessonId = Number(
           this.route.snapshot.queryParamMap.get('lesson')
         );
 
         this.activeLesson = lessonId
-          ? lessons.find(lesson => lesson.id === lessonId) ?? lessons[0] ?? null
-          : lessons[0] ?? null;
+          ? this.lessons.find(lesson => lesson.id === lessonId) ?? this.lessons[0] ?? null
+          : this.lessons[0] ?? null;
+
+        const activeSection = this.sections.find(section =>
+          section.lessons.some(lesson => lesson.id === this.activeLesson?.id)
+        );
+
+        if (activeSection) {
+          this.openSectionIds.add(activeSection.id);
+        } else if (this.sections[0]) {
+          this.openSectionIds.add(this.sections[0].id);
+        }
 
         this.loading = false;
 
@@ -90,8 +105,39 @@ export class Lessons implements OnInit {
     });
   }
 
+  toggleSection(sectionId: number): void {
+    if (this.openSectionIds.has(sectionId)) {
+      this.openSectionIds.delete(sectionId);
+      return;
+    }
+
+    this.openSectionIds.add(sectionId);
+  }
+
+  isSectionOpen(sectionId: number): boolean {
+    return this.openSectionIds.has(sectionId);
+  }
+
+  isLessonCompleted(lesson: Lesson): boolean {
+    return lesson.completed === true;
+  }
+
+  sectionCompleted(section: LessonSection): number {
+    return section.lessons.filter(lesson => lesson.completed).length;
+  }
+
+  getActiveSectionName(): string {
+    if (!this.activeLesson) return '';
+    return this.sections.find(section =>
+      section.lessons.some(lesson => lesson.id === this.activeLesson?.id)
+    )?.name ?? '';
+  }
+
+
   selectLesson(lesson: Lesson): void {
     this.activeLesson = lesson;
+    const section = this.sections.find(item => item.lessons.some(entry => entry.id === lesson.id));
+    if (section) this.openSectionIds.add(section.id);
     this.message = '';
     this.errorMessage = '';
 
@@ -323,11 +369,37 @@ loadGuestCode(): void {
         this.message =
           response.message ?? 'Lecke teljesítve.';
         this.errorMessage = '';
+        this.markActiveLessonCompleted();
       },
       error: error => {
         this.handleError(error);
       }
     });
+  }
+
+  private markActiveLessonCompleted(): void {
+    if (!this.activeLesson || this.activeLesson.completed) return;
+
+    this.activeLesson.completed = true;
+    const section = this.sections.find(item =>
+      item.lessons.some(lesson => lesson.id === this.activeLesson?.id)
+    );
+
+    if (section) {
+      const completed = this.sectionCompleted(section);
+      section.progress.completed = completed;
+      section.progress.percentage = section.progress.total > 0
+        ? Math.round((completed / section.progress.total) * 100)
+        : 0;
+    }
+
+    if (this.curriculum) {
+      const completed = this.lessons.filter(lesson => lesson.completed).length;
+      this.curriculum.progress.completed = completed;
+      this.curriculum.progress.percentage = this.curriculum.progress.total > 0
+        ? Math.round((completed / this.curriculum.progress.total) * 100)
+        : 0;
+    }
   }
 
   private handleError(error: any): void {
