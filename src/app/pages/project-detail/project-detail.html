@@ -36,7 +36,12 @@
               <strong>{{ project.validation_configured ? 'Automatikusan ellenőrizhető' : 'Ellenőrzés beállításra vár' }}</strong>
               <p>
                 @if (project.validation_configured) {
-                  A rendszer a futtatott program eredményét ellenőrzi. Típus: {{ validationLabel() }}.
+                  <span>Típus: {{ validationLabel() }}.</span>
+                  @if (project.validation_trusted) {
+                    <span> Siker esetén ez az ellenőrzés XP-t is adhat.</span>
+                  } @else {
+                    <span> A konzolos ellenőrzés csak azonnali visszajelzés, XP-t nem ad.</span>
+                  }
                 } @else {
                   A projektet már megoldhatod és mentheted, de az adminnak még meg kell adnia a várt eredményt.
                 }

@@ -10,9 +10,10 @@ export type CompanionStageKey =
   | 'era-8'
   | 'era-9'
   | 'era-10';
-export type BuddyRoomKey = 'studio' | 'play' | 'night';
+export type BuddyRoomKey = 'studio' | 'play' | 'night' | 'aurora' | 'cyber';
 
 export interface CompanionSkin { key: string; name: string; premium: boolean; unlocked: boolean; }
+export interface CompanionRoom { key: BuddyRoomKey; name: string; premium: boolean; unlocked: boolean; }
 
 export type CompanionMoodKey = 'wilted' | 'calm' | 'happy' | 'radiant';
 
@@ -68,7 +69,7 @@ export interface CompanionState {
   xp_points: number;
   actions: CompanionAction[];
   available_skins: CompanionSkin[];
-  available_rooms: BuddyRoomKey[];
+  available_rooms: CompanionRoom[];
 }
 
 export interface CompanionActionResponse {

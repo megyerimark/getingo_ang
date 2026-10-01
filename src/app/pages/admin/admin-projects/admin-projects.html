@@ -46,8 +46,12 @@
         <div class="admin-field">
           <label>Ellenőrzés típusa</label>
           <select formControlName="validation_type">
-            <option value="console_exact">Pontos konzolkimenet</option>
-            <option value="console_contains">Elvárt sorok szerepeljenek</option>
+            <option value="javascript_contains">JavaScript tartalmazza a megadott részleteket (szerveroldali, XP-képes)</option>
+            <option value="html_contains">HTML tartalmazza a megadott részleteket (szerveroldali, XP-képes)</option>
+            <option value="css_contains">CSS tartalmazza a megadott részleteket (szerveroldali, XP-képes)</option>
+            <option value="source_contains">Bármely forrás tartalmazza a részleteket (szerveroldali, XP-képes)</option>
+            <option value="console_exact">Pontos konzolkimenet (csak visszajelzés, nem ad XP-t)</option>
+            <option value="console_contains">Elvárt konzolsorok (csak visszajelzés, nem ad XP-t)</option>
           </select>
         </div>
 
@@ -72,9 +76,9 @@
         </div>
 
         <div class="admin-field full">
-          <label>Elvárt konzolkimenet</label>
-          <textarea class="code-input" rows="5" formControlName="expected_output" placeholder="18&#10;19"></textarea>
-          <small>Soronként egy elvárt érték. Ezt a tanulói API nem küldi le a böngészőnek.</small>
+          <label>Elvárt ellenőrzési részletek</label>
+          <textarea class="code-input" rows="5" formControlName="expected_output" placeholder="Soronként egy kötelező kódrészlet, pl. console.log(total)"></textarea>
+          <small>Soronként egy kötelező részlet. Szerveroldali típusnál ezeknek a beküldött HTML/CSS/JavaScript forrásban kell szerepelniük. A régi konzolos típusok biztonsági okból nem adnak XP-t.</small>
         </div>
 
         <div class="admin-field full">

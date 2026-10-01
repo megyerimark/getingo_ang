@@ -28,11 +28,9 @@ export class Buddy3D implements AfterViewInit, OnChanges, OnDestroy {
   @Input() modelUrl = '/models/getingo-buddy/getingo-buddy.glb';
   @ViewChild('canvas', { static: true }) canvasRef!: ElementRef<HTMLCanvasElement>;
 
-  modelStatus: 'loading' | 'ready' | 'demo' | 'error' = 'loading';
+  modelStatus: 'loading' | 'ready' | 'fallback' | 'error' = 'loading';
   modelStatusText = 'A 3D Buddy modell betöltése…';
-  usingDemoModel = false;
 
-  private readonly demoModelUrl = 'https://raw.githubusercontent.com/code4fukui/vr-cats/main/bicolor_cat.glb';
   private renderer?: THREE.WebGLRenderer;
   private scene?: THREE.Scene;
   private camera?: THREE.PerspectiveCamera;
@@ -222,32 +220,23 @@ export class Buddy3D implements AfterViewInit, OnChanges, OnDestroy {
   private async loadBuddyModel(): Promise<void> {
     this.modelStatus = 'loading';
     this.modelStatusText = 'A 3D Buddy modell betöltése…';
-    this.usingDemoModel = false;
 
     this.clearModel();
 
     try {
       const gltf = await this.loader.loadAsync(this.modelUrl);
-      this.installModel(gltf.scene, gltf.animations, false);
+      this.installModel(gltf.scene, gltf.animations);
       return;
     } catch {
-      // Development fallback: still a true rigged GLB model. Replace the local file
-      // with the final Getingo character and this network fallback is never used.
-    }
-
-    try {
-      const gltf = await this.loader.loadAsync(this.demoModelUrl);
-      this.installModel(gltf.scene, gltf.animations, true);
-    } catch {
-      this.modelStatus = 'error';
-      this.modelStatusText = 'A 3D modell nem tölthető be. Tedd a végleges GLB-t a public/models/getingo-buddy mappába.';
+      // Production-safe fallback: no third-party model is fetched. The generated
+      // local Buddy keeps the feature usable until the final GLB is deployed.
+      this.installProceduralFallback();
     }
   }
 
-  private installModel(scene: THREE.Group, animations: THREE.AnimationClip[], demo: boolean): void {
+  private installModel(scene: THREE.Group, animations: THREE.AnimationClip[]): void {
     this.model = scene;
     this.clips = animations;
-    this.usingDemoModel = demo;
 
     scene.traverse(object => {
       object.castShadow = true;
@@ -300,11 +289,126 @@ export class Buddy3D implements AfterViewInit, OnChanges, OnDestroy {
       this.activeClip = this.idleClip;
     }
 
-    this.modelStatus = demo ? 'demo' : 'ready';
-    this.modelStatusText = demo
-      ? 'Demo riggelt 3D modell · a végleges Getingo GLB helyére automatikusan átvált'
-      : 'Getingo Buddy · riggelt GLB modell aktív';
+    this.modelStatus = 'ready';
+    this.modelStatusText = 'Getingo Buddy · helyi riggelt GLB modell aktív';
 
+    this.applyState();
+  }
+
+  private installProceduralFallback(): void {
+    const cat = new THREE.Group();
+    cat.name = 'getingo-procedural-buddy';
+
+    const fur = new THREE.MeshPhysicalMaterial({ color: 0xb9d8ff, roughness: .72, clearcoat: .12 });
+    const furLight = new THREE.MeshPhysicalMaterial({ color: 0xe9f5ff, roughness: .78, clearcoat: .08 });
+    const dark = new THREE.MeshStandardMaterial({ color: 0x17233d, roughness: .48 });
+    const accent = new THREE.MeshStandardMaterial({ color: 0x2d8cff, emissive: 0x0d4d9c, emissiveIntensity: .4, roughness: .35 });
+
+    [fur, furLight, dark, accent].forEach(material => {
+      this.originalMaterialColors.set(material, material.color.clone());
+    });
+
+    const body = new THREE.Mesh(new THREE.SphereGeometry(.72, 36, 28), fur);
+    body.scale.set(.88, 1.08, .78);
+    body.position.y = .92;
+    body.castShadow = true;
+
+    const chest = new THREE.Mesh(new THREE.SphereGeometry(.43, 28, 22), furLight);
+    chest.scale.set(.72, 1.0, .42);
+    chest.position.set(0, .88, .55);
+    chest.castShadow = true;
+
+    const head = new THREE.Group();
+    head.name = 'head';
+    head.position.y = 1.88;
+    const headMesh = new THREE.Mesh(new THREE.SphereGeometry(.58, 36, 28), fur);
+    headMesh.scale.set(1.02, .92, .92);
+    headMesh.castShadow = true;
+    head.add(headMesh);
+
+    const muzzle = new THREE.Mesh(new THREE.SphereGeometry(.28, 24, 18), furLight);
+    muzzle.scale.set(1.18, .68, .62);
+    muzzle.position.set(0, -.13, .48);
+    head.add(muzzle);
+
+    const makeEar = (x: number, zRotation: number): THREE.Group => {
+      const ear = new THREE.Group();
+      const outer = new THREE.Mesh(new THREE.ConeGeometry(.24, .48, 3), fur);
+      outer.rotation.z = zRotation;
+      outer.rotation.x = -.08;
+      const inner = new THREE.Mesh(new THREE.ConeGeometry(.13, .29, 3), accent);
+      inner.position.z = .025;
+      inner.rotation.z = zRotation;
+      inner.rotation.x = -.08;
+      ear.add(outer, inner);
+      ear.position.set(x, .46, -.02);
+      return ear;
+    };
+
+    const leftEar = makeEar(-.37, -.08);
+    const rightEar = makeEar(.37, .08);
+    leftEar.name = 'left-ear';
+    rightEar.name = 'right-ear';
+    head.add(leftEar, rightEar);
+
+    for (const x of [-.22, .22]) {
+      const eye = new THREE.Mesh(new THREE.SphereGeometry(.085, 20, 16), dark);
+      eye.scale.y = 1.12;
+      eye.position.set(x, .05, .53);
+      head.add(eye);
+      const glint = new THREE.Mesh(new THREE.SphereGeometry(.022, 12, 10), furLight);
+      glint.position.set(x - .02, .08, .605);
+      head.add(glint);
+    }
+
+    const nose = new THREE.Mesh(new THREE.SphereGeometry(.055, 16, 12), accent);
+    nose.scale.set(1.15, .72, .7);
+    nose.position.set(0, -.12, .7);
+    head.add(nose);
+
+    const makePaw = (x: number): THREE.Mesh => {
+      const paw = new THREE.Mesh(new THREE.CapsuleGeometry(.16, .42, 5, 12), fur);
+      paw.position.set(x, .34, .37);
+      paw.rotation.x = .12;
+      paw.castShadow = true;
+      return paw;
+    };
+
+    const tail = new THREE.Group();
+    tail.name = 'tail';
+    tail.position.set(-.62, .88, -.18);
+    for (let i = 0; i < 4; i++) {
+      const segment = new THREE.Mesh(new THREE.CapsuleGeometry(.105 - i * .008, .34, 5, 10), fur);
+      segment.rotation.z = Math.PI / 2 + .18;
+      segment.position.set(-.18 - i * .27, .08 + i * .11, -.08);
+      segment.castShadow = true;
+      tail.add(segment);
+    }
+
+    const collar = new THREE.Mesh(new THREE.TorusGeometry(.43, .035, 10, 32), accent);
+    collar.rotation.x = Math.PI / 2;
+    collar.position.y = 1.47;
+
+    cat.add(body, chest, head, makePaw(-.38), makePaw(.38), tail, collar);
+    cat.traverse(object => {
+      if (object instanceof THREE.Mesh) {
+        object.castShadow = true;
+        object.receiveShadow = true;
+      }
+    });
+
+    this.model = cat;
+    this.modelContainer.add(cat);
+    this.headBone = head;
+    this.headBase.copy(head.rotation);
+    this.tailBone = tail;
+    this.tailBase.copy(tail.rotation);
+    this.leftEarBone = leftEar;
+    this.leftEarBase.copy(leftEar.rotation);
+    this.rightEarBone = rightEar;
+    this.rightEarBase.copy(rightEar.rotation);
+    this.modelStatus = 'fallback';
+    this.modelStatusText = 'Helyi Getingo 3D tartalékmodell aktív · a végleges GLB még nincs telepítve';
     this.applyState();
   }
 
@@ -595,7 +699,9 @@ export class Buddy3D implements AfterViewInit, OnChanges, OnDestroy {
     const rooms: Record<BuddyRoomKey, { fog: number; floor: number; bed: number; exposure: number }> = {
       studio: { fog: 0x091a31, floor: 0x123e73, bed: 0x204b83, exposure: 1.15 },
       play: { fog: 0x1b1243, floor: 0x5a2a88, bed: 0x7d3bb0, exposure: 1.18 },
-      night: { fog: 0x020611, floor: 0x11213d, bed: 0x1d3152, exposure: .96 }
+      night: { fog: 0x020611, floor: 0x11213d, bed: 0x1d3152, exposure: .96 },
+      aurora: { fog: 0x160b2d, floor: 0x264a66, bed: 0x593f87, exposure: 1.22 },
+      cyber: { fog: 0x03151a, floor: 0x073c46, bed: 0x145d66, exposure: 1.2 }
     };
 
     const config = rooms[this.room];

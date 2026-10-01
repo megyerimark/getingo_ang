@@ -102,7 +102,7 @@ export interface AdminProject {
   starter_html?: string | null;
   starter_css?: string | null;
   starter_javascript?: string | null;
-  validation_type: 'console_exact' | 'console_contains';
+  validation_type: 'console_exact' | 'console_contains' | 'html_contains' | 'css_contains' | 'javascript_contains' | 'source_contains';
   expected_output?: string | null;
   xp_reward: number;
 }

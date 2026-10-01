@@ -14,6 +14,12 @@
         <a routerLink="/categories">Tananyagok</a>
         <a routerLink="/search">Keresés</a>
       </div>
+      <div>
+        <strong>Adatvédelem</strong>
+        <a routerLink="/adatkezelesi-tajekoztato">Adatkezelés</a>
+        <a routerLink="/sutik">Süti tájékoztató</a>
+        <button type="button" class="footer-link-button" (click)="cookieConsent.openSettings()">Süti beállítások</button>
+      </div>
     </div>
 
     <div class="footer-cta">

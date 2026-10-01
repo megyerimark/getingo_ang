@@ -1,4 +1,4 @@
-export type ProjectValidationType = 'console_exact' | 'console_contains';
+export type ProjectValidationType = 'console_exact' | 'console_contains' | 'html_contains' | 'css_contains' | 'javascript_contains' | 'source_contains';
 
 export interface Project {
   id: number;
@@ -13,6 +13,7 @@ export interface Project {
   starter_javascript?: string;
   validation_type?: ProjectValidationType;
   validation_configured?: boolean;
+  validation_trusted?: boolean;
   created_at?: string;
   updated_at?: string;
 }
@@ -46,6 +47,7 @@ export interface ProjectCheckPayload extends ProjectWorkspacePayload {
 
 export interface ProjectCheckResponse {
   passed: boolean;
+  verified?: boolean;
   message: string;
   earned_xp?: number;
   already_completed?: boolean;

@@ -29,6 +29,12 @@ export const routes: Routes = [
         .then(m => m.Privacy)
   },
   {
+    path: 'sutik',
+    loadComponent: () =>
+      import('./pages/cookies/cookies')
+        .then(m => m.Cookies)
+  },
+  {
     path: 'premium',
     loadComponent: () =>
       import('./pages/premium/premium')

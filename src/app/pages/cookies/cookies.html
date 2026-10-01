@@ -1,0 +1,28 @@
+<section class="cookies-page">
+  <div class="cookies-shell">
+    <a routerLink="/" class="back-link"><i class="bi bi-arrow-left"></i> Vissza a főoldalra</a>
+    <header><span class="eyebrow">GETINGO · ADATVÉDELEM</span><h1>Süti tájékoztató</h1><p>Utolsó frissítés: 2026. október 1.</p></header>
+
+    <article>
+      <h2>Miért használ a Getingo sütiket?</h2>
+      <p>A Getingo a szolgáltatás működéséhez szükséges technikai sütiket használ. Ezek biztosítják többek között a biztonságos bejelentkezést, a munkamenetet, a CSRF-védelmet és azt, hogy megjegyezzük a sütikkel kapcsolatos választásodat.</p>
+
+      <h2>Szükséges sütik</h2>
+      <div class="cookie-table">
+        <div><strong>Getingo/Laravel munkamenet</strong><span>Bejelentkezés és munkamenet fenntartása</span><small>Szükséges · időtartama a szerver munkamenet-beállításától függ</small></div>
+        <div><strong>XSRF-TOKEN</strong><span>CSRF-támadások elleni védelem</span><small>Szükséges · technikai biztonsági süti</small></div>
+        <div><strong>getingo_cookie_preferences</strong><span>A süti-beállításaid megjegyzése</span><small>Szükséges preferencia · legfeljebb 1 év</small></div>
+      </div>
+
+      <h2>Opcionális sütik</h2>
+      <p>A jelenlegi projektben nincs bekapcsolva külső analitikai vagy marketing integráció. Ha később ilyen szolgáltatás kerül az oldalra, annak kódja csak a megfelelő hozzájárulás után tölthető be.</p>
+
+      <h2>A választásod</h2>
+      <p>A szükséges sütik nem kapcsolhatók ki a Getingo felületén, mert nélkülük a biztonságos bejelentkezés és több alapfunkció nem működne. Az opcionális célokat bármikor elfogadhatod vagy elutasíthatod.</p>
+      <button type="button" class="settings-button" (click)="consent.openSettings()"><i class="bi bi-sliders"></i> Süti beállítások módosítása</button>
+
+      <h2>Kapcsolódó tájékoztató</h2>
+      <p>A személyes adatok kezeléséről az <a routerLink="/adatkezelesi-tajekoztato">Adatkezelési tájékoztatóban</a> találsz további információt.</p>
+    </article>
+  </div>
+</section>

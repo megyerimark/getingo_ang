@@ -7,9 +7,19 @@
   @if (loading) { <div class="loading"><span class="spinner-border"></span> Pixel szobájának betöltése...</div> }
   @else if (state) {
     <section class="room-tabs">
-      <button [class.active]="room==='studio'" (click)="switchRoom('studio')"><i class="bi bi-code-square"></i><span>Tech stúdió</span></button>
-      <button [class.active]="room==='play'" (click)="switchRoom('play')"><i class="bi bi-controller"></i><span>Játékszoba</span></button>
-      <button [class.active]="room==='night'" (click)="switchRoom('night')"><i class="bi bi-moon-stars"></i><span>Éjszakai mód</span></button>
+      @for (availableRoom of state.available_rooms; track availableRoom.key) {
+        <button
+          type="button"
+          [class.active]="room===availableRoom.key"
+          [class.locked]="!availableRoom.unlocked"
+          [disabled]="!availableRoom.unlocked"
+          (click)="selectRoom(availableRoom)">
+          <i [class]="'bi ' + roomIcon(availableRoom.key)"></i>
+          <span>{{ availableRoom.name }}</span>
+          @if (availableRoom.premium) { <small>PRO</small> }
+          @if (!availableRoom.unlocked) { <i class="bi bi-lock-fill"></i> }
+        </button>
+      }
     </section>
 
     <section class="buddy-grid">

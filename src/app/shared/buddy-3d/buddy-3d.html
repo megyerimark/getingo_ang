@@ -17,8 +17,8 @@
     <div class="model-error"><i class="bi bi-exclamation-triangle"></i>{{ modelStatusText }}</div>
   }
 
-  @if (modelStatus === 'demo') {
-    <div class="model-source">Demo 3D alapmodell · kenchoo · CC BY 4.0</div>
+  @if (modelStatus === 'fallback') {
+    <div class="model-source">Helyi tartalék 3D Buddy · nincs külső modellbetöltés</div>
   }
 
   <button class="reset-view" type="button" (click)="resetView()" title="Kamera alaphelyzet">

@@ -2,12 +2,13 @@ import { DOCUMENT } from '@angular/common';
 import { Component, effect, inject } from '@angular/core';
 import { Router, RouterOutlet } from '@angular/router';
 import { Footer } from './shared/footer/footer';
+import { CookieConsent } from './shared/cookie-consent/cookie-consent';
 import { Navbar } from './shared/navbar/navbar';
 import { Auth } from './services/auth';
 
 @Component({
   selector: 'app-root',
-  imports: [RouterOutlet, Navbar, Footer],
+  imports: [RouterOutlet, Navbar, Footer, CookieConsent],
   templateUrl: './app.html',
   styleUrl: './app.scss'
 })

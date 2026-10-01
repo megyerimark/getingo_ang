@@ -198,9 +198,14 @@ export class ProjectDetail implements OnInit {
   }
 
   validationLabel(): string {
-    return this.project?.validation_type === 'console_contains'
-      ? 'Elvárt konzolsorok'
-      : 'Pontos konzolkimenet';
+    switch (this.project?.validation_type) {
+      case 'html_contains': return 'Szerveroldali HTML-ellenőrzés';
+      case 'css_contains': return 'Szerveroldali CSS-ellenőrzés';
+      case 'javascript_contains': return 'Szerveroldali JavaScript-ellenőrzés';
+      case 'source_contains': return 'Szerveroldali forrásellenőrzés';
+      case 'console_contains': return 'Elvárt konzolsorok (visszajelzés)';
+      default: return 'Pontos konzolkimenet (visszajelzés)';
+    }
   }
 
   mentorIcon(): string {
@@ -233,12 +238,16 @@ export class ProjectDetail implements OnInit {
     this.checking = false;
 
     if (response.passed && this.project) {
-      this.project.is_completed = true;
+      if (response.verified !== false) {
+        this.project.is_completed = response.is_completed;
+      }
       this.mentorOpen = true;
-      this.mentorTone = 'success';
-      this.mentorHint = response.already_completed
-        ? 'A megoldás továbbra is átmegy az ellenőrzésen. Most már próbáld meg egyszerűsíteni vagy szebben strukturálni a kódot.'
-        : 'Sikerült. Nézd meg, melyik gondolat volt a kulcs, mert ezt a mintát később más feladatoknál is használni fogod.';
+      this.mentorTone = response.verified === false ? 'tip' : 'success';
+      this.mentorHint = response.verified === false
+        ? 'A böngészős kimenet jónak tűnik, de biztonsági okból ez az ellenőrzéstípus nem igazol projekt-teljesítést és nem ad XP-t.'
+        : response.already_completed
+          ? 'A megoldás továbbra is átmegy az ellenőrzésen. Most már próbáld meg egyszerűsíteni vagy szebben strukturálni a kódot.'
+          : 'Sikerült. Nézd meg, melyik gondolat volt a kulcs, mert ezt a mintát később más feladatoknál is használni fogod.';
       return;
     }
 

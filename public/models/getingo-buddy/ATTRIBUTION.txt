@@ -1,14 +1,13 @@
-DEVELOPMENT FALLBACK MODEL
-==========================
+GETINGO BUDDY MODEL PLACEHOLDER
+==============================
 
-Bicolor Cat by kenchoo
-License: Creative Commons Attribution 4.0 (CC BY 4.0)
-Source/project reference:
-https://github.com/code4fukui/vr-cats
-https://sketchfab.com/kenchoo
+Production model path:
+/public/models/getingo-buddy/getingo-buddy.glb
 
-The fallback model is loaded from the public vr-cats repository only when
-/public/models/getingo-buddy/getingo-buddy.glb is not present.
+The application no longer downloads a third-party fallback model. If the local GLB is
+missing, the frontend builds a simple Getingo cat from Three.js primitives, so no external
+model request is made.
 
-For production, replace the fallback with the custom Getingo Buddy GLB and update/remove
-this attribution only if the fallback is no longer used anywhere.
+If you later choose to use a third-party GLB, keep the license and attribution required by
+that model next to the deployed asset. Do not copy the old demo attribution unless that
+specific licensed model is actually used.

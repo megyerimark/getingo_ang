@@ -21,7 +21,7 @@ export class AdminProjects implements OnInit {
     starter_html: new FormControl('', { nonNullable: true }),
     starter_css: new FormControl('', { nonNullable: true }),
     starter_javascript: new FormControl('', { nonNullable: true }),
-    validation_type: new FormControl<'console_exact' | 'console_contains'>('console_exact', { nonNullable: true }),
+    validation_type: new FormControl<'console_exact' | 'console_contains' | 'html_contains' | 'css_contains' | 'javascript_contains' | 'source_contains'>('javascript_contains', { nonNullable: true }),
     expected_output: new FormControl('', { nonNullable: true }),
     solution: new FormControl('', { nonNullable: true })
   });
@@ -63,7 +63,7 @@ export class AdminProjects implements OnInit {
       starter_html: project.starter_html ?? '',
       starter_css: project.starter_css ?? '',
       starter_javascript: project.starter_javascript ?? '',
-      validation_type: project.validation_type ?? 'console_exact',
+      validation_type: project.validation_type ?? 'javascript_contains',
       expected_output: project.expected_output ?? '',
       solution: project.solution ?? ''
     });
@@ -86,7 +86,7 @@ export class AdminProjects implements OnInit {
       starter_html: '',
       starter_css: '',
       starter_javascript: '',
-      validation_type: 'console_exact',
+      validation_type: 'javascript_contains',
       expected_output: '',
       solution: ''
     });

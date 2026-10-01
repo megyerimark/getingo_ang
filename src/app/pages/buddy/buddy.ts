@@ -2,7 +2,7 @@ import { Component, OnInit, ViewChild } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { finalize } from 'rxjs';
 import { Auth } from '../../services/auth';
-import { BuddyRoomKey, CompanionActionKey, CompanionState, CompanionSkin } from '../../core/models/companion.model';
+import { BuddyRoomKey, CompanionActionKey, CompanionRoom, CompanionState, CompanionSkin } from '../../core/models/companion.model';
 import { CompanionService } from '../../services/companion';
 import { Buddy3D } from '../../shared/buddy-3d/buddy-3d';
 
@@ -44,9 +44,23 @@ export class Buddy implements OnInit {
     });
   }
 
-  switchRoom(room: BuddyRoomKey): void {
-    if (!this.state || room === this.room) return;
-    this.companionService.updatePreferences({ room }).subscribe({ next: state => this.state=state, error: () => this.error='A szoba mentése nem sikerült.' });
+  selectRoom(room: CompanionRoom): void {
+    if (!this.state || !room.unlocked || room.key === this.room) return;
+    this.error = '';
+    this.companionService.updatePreferences({ room: room.key }).subscribe({
+      next: state => this.state = state,
+      error: err => this.error = err?.error?.errors?.room?.[0] ?? 'A szoba mentése nem sikerült.'
+    });
+  }
+
+  roomIcon(room: BuddyRoomKey): string {
+    switch (room) {
+      case 'play': return 'bi-controller';
+      case 'night': return 'bi-moon-stars';
+      case 'aurora': return 'bi-stars';
+      case 'cyber': return 'bi-cpu';
+      default: return 'bi-code-square';
+    }
   }
 
   selectSkin(skin: CompanionSkin): void {

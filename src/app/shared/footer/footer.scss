@@ -65,13 +65,15 @@
   letter-spacing: .04em;
 }
 
-.footer-links a {
+.footer-links a,
+.footer-link-button {
   color: #9db0ce;
   text-decoration: none;
   transition: .2s ease;
 }
 
-.footer-links a:hover {
+.footer-links a:hover,
+.footer-link-button:hover {
   color: #fff;
 }
 
@@ -131,3 +133,5 @@
     flex-direction: column;
   }
 }
+
+.footer-link-button { padding: 0; border: 0; background: transparent; text-align: left; cursor: pointer; font: inherit; }

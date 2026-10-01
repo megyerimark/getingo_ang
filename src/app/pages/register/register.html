@@ -61,7 +61,7 @@
         </div>
 
         @if (registerForm.controls.privacy_accepted.touched && registerForm.controls.privacy_accepted.invalid) {
-          <div class="privacy-error">A regisztrációhoz ezt el kell fogadnod.</div>
+          <div class="privacy-error">A regisztrációhoz ezt el kell olvasnod és tudomásul kell venned.</div>
         }
 
         <button type="submit" class="auth-submit" [disabled]="isLoading || registerForm.invalid">

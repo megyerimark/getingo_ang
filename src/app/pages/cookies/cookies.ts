@@ -3,11 +3,11 @@ import { RouterLink } from '@angular/router';
 import { CookieConsentService } from '../../services/cookie-consent';
 
 @Component({
-  selector: 'app-footer',
+  selector: 'app-cookies',
   imports: [RouterLink],
-  templateUrl: './footer.html',
-  styleUrl: './footer.scss'
+  templateUrl: './cookies.html',
+  styleUrl: './cookies.scss'
 })
-export class Footer {
-  constructor(public cookieConsent: CookieConsentService) {}
+export class Cookies {
+  constructor(public consent: CookieConsentService) {}
 }
