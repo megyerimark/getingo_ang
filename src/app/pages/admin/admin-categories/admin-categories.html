@@ -1,13 +1,5 @@
 <h1 class="mb-4">Fő kategóriák</h1>
 
-@if (message) {
-  <div class="alert alert-success">{{ message }}</div>
-}
-
-@if (errorMessage) {
-  <div class="alert alert-danger">{{ errorMessage }}</div>
-}
-
 <div class="card mb-4">
   <div class="card-body">
     <h4 class="mb-3">{{ editingId ? 'Fő kategória szerkesztése' : 'Új fő kategória' }}</h4>

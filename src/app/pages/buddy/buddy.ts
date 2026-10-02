@@ -5,6 +5,7 @@ import { Auth } from '../../services/auth';
 import { BuddyRoomKey, CompanionActionKey, CompanionRoom, CompanionState, CompanionSkin } from '../../core/models/companion.model';
 import { CompanionService } from '../../services/companion';
 import { Buddy3D } from '../../shared/buddy-3d/buddy-3d';
+import { ToastService } from '../../services/toast';
 
 @Component({
   selector: 'app-buddy',
@@ -17,10 +18,9 @@ export class Buddy implements OnInit {
   state: CompanionState | null = null;
   loading = true;
   action: CompanionActionKey | null = null;
-  message = '';
   error = '';
 
-  constructor(public auth: Auth, private companionService: CompanionService) {}
+  constructor(public auth: Auth, private companionService: CompanionService, private toast: ToastService) {}
 
   ngOnInit(): void { this.load(); }
 
@@ -37,10 +37,10 @@ export class Buddy implements OnInit {
 
   care(action: CompanionActionKey): void {
     if (this.action) return;
-    this.action = action; this.message=''; this.error='';
+    this.action = action; this.error='';
     this.companionService.performAction(action).pipe(finalize(() => this.action=null)).subscribe({
-      next: response => { this.state=response.state; this.message=response.message; setTimeout(() => this.buddy3d?.playAction(action)); },
-      error: err => this.error=err?.error?.errors?.action?.[0] ?? err?.error?.message ?? 'A művelet nem sikerült.'
+      next: response => { this.state=response.state; this.toast.success(response.message); setTimeout(() => this.buddy3d?.playAction(action)); },
+      error: err => this.toast.error(err?.error?.errors?.action?.[0] ?? err?.error?.message ?? 'A művelet nem sikerült.')
     });
   }
 
@@ -49,7 +49,7 @@ export class Buddy implements OnInit {
     this.error = '';
     this.companionService.updatePreferences({ room: room.key }).subscribe({
       next: state => this.state = state,
-      error: err => this.error = err?.error?.errors?.room?.[0] ?? 'A szoba mentése nem sikerült.'
+      error: err => this.toast.error(err?.error?.errors?.room?.[0] ?? 'A szoba mentése nem sikerült.')
     });
   }
 
@@ -65,11 +65,11 @@ export class Buddy implements OnInit {
 
   selectSkin(skin: CompanionSkin): void {
     if (!skin.unlocked || !this.state) return;
-    this.companionService.updatePreferences({ skin: skin.key }).subscribe({ next: state => this.state=state, error: err => this.error=err?.error?.errors?.skin?.[0] ?? 'A skin nem választható.' });
+    this.companionService.updatePreferences({ skin: skin.key }).subscribe({ next: state => this.state=state, error: err => this.toast.error(err?.error?.errors?.skin?.[0] ?? 'A skin nem választható.') });
   }
 
-  pet(): void { this.buddy3d?.pet(); this.message='Pixel élvezi a simogatást.'; }
-  rest(): void { this.buddy3d?.rest(); this.message='Pixel lepihen egy kicsit.'; }
+  pet(): void { this.buddy3d?.pet(); this.toast.info('Pixel élvezi a simogatást.'); }
+  rest(): void { this.buddy3d?.rest(); this.toast.info('Pixel lepihen egy kicsit.'); }
   actionCost(action: CompanionActionKey): number { return this.state?.actions.find(item=>item.key===action)?.cost ?? 0; }
   tip(): string { if(!this.state)return ''; const c=this.state.companion; const min=Math.min(c.water,c.hunger,c.happiness); return min===c.water?'Pixel megszomjazott.':min===c.hunger?'Pixel enne valamit.':'Pixel játszana veled.'; }
 }

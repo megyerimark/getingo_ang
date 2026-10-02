@@ -2,6 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { finalize } from 'rxjs';
 import { AdminRevenueResponse } from '../../../core/models/admin.model';
 import { AdminService } from '../../../services/admin';
+import { ToastService } from '../../../services/toast';
 
 @Component({
   selector: 'app-admin-revenue',
@@ -14,10 +15,9 @@ export class AdminRevenue implements OnInit {
   loading = true;
   syncing = false;
   error = '';
-  syncMessage = '';
   months = 12;
 
-  constructor(private adminService: AdminService) {}
+  constructor(private adminService: AdminService, private toast: ToastService) {}
 
   ngOnInit(): void { this.load(); }
 
@@ -35,12 +35,11 @@ export class AdminRevenue implements OnInit {
   syncStripe(): void {
     if (this.syncing) return;
     this.syncing = true;
-    this.syncMessage = '';
     this.adminService.syncStripeRevenue()
       .pipe(finalize(() => this.syncing = false))
       .subscribe({
-        next: result => { this.syncMessage = `${result.synced} Stripe számla szinkronizálva.`; this.load(); },
-        error: err => this.error = err?.error?.message ?? 'A Stripe szinkronizálás nem sikerült.'
+        next: result => { this.toast.success(`${result.synced} Stripe számla szinkronizálva.`); this.load(); },
+        error: err => this.toast.error(err?.error?.message ?? 'A Stripe szinkronizálás nem sikerült.')
       });
   }
 

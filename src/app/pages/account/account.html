@@ -29,8 +29,6 @@
           </div>
         }
 
-        @if (profileMessage) { <div class="feedback success">{{ profileMessage }}</div> }
-        @if (profileError) { <div class="feedback error">{{ profileError }}</div> }
 
         <form [formGroup]="profileForm" (ngSubmit)="saveProfile()">
           <label>
@@ -64,8 +62,6 @@
           </div>
         </div>
 
-        @if (passwordMessage) { <div class="feedback success">{{ passwordMessage }}</div> }
-        @if (passwordError) { <div class="feedback error">{{ passwordError }}</div> }
 
         <form [formGroup]="passwordForm" (ngSubmit)="changePassword()">
           <label>
@@ -109,7 +105,6 @@
           </div>
         </div>
 
-        @if (deleteError) { <div class="feedback error">{{ deleteError }}</div> }
 
         <form [formGroup]="deleteForm" (ngSubmit)="deleteAccount()">
           <label>

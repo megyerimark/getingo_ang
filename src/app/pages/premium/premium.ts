@@ -4,6 +4,7 @@ import { finalize } from 'rxjs';
 import { BillingPlan } from '../../core/models/billing.model';
 import { Auth } from '../../services/auth';
 import { BillingService } from '../../services/billing';
+import { ToastService } from '../../services/toast';
 
 @Component({
   selector: 'app-premium',
@@ -22,7 +23,8 @@ export class Premium implements OnInit {
   constructor(
     public auth: Auth,
     private billing: BillingService,
-    private router: Router
+    private router: Router,
+    private toast: ToastService
   ) {}
 
   ngOnInit(): void {
@@ -79,30 +81,24 @@ export class Premium implements OnInit {
       return;
     }
 
-    this.errorMessage = '';
     this.checkoutLoading = plan;
 
     this.billing.checkout(plan)
       .pipe(finalize(() => this.checkoutLoading = null))
       .subscribe({
         next: response => window.location.assign(response.url),
-        error: error => {
-          this.errorMessage = error.error?.message ?? 'A Stripe Checkout indítása nem sikerült.';
-        }
+        error: error => this.toast.error(error.error?.message ?? 'A Stripe Checkout indítása nem sikerült.')
       });
   }
 
   manageBilling(): void {
-    this.errorMessage = '';
     this.portalLoading = true;
 
     this.billing.portal()
       .pipe(finalize(() => this.portalLoading = false))
       .subscribe({
         next: response => window.location.assign(response.url),
-        error: error => {
-          this.errorMessage = error.error?.message ?? 'A számlázási felület megnyitása nem sikerült.';
-        }
+        error: error => this.toast.error(error.error?.message ?? 'A számlázási felület megnyitása nem sikerült.')
       });
   }
 }

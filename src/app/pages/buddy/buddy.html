@@ -36,7 +36,7 @@
         <div class="meter"><div><span>Jóllakottság</span><strong>{{ state.companion.hunger }}%</strong></div><div class="track food"><span [style.width.%]="state.companion.hunger"></span></div></div>
         <div class="meter"><div><span>Kedv</span><strong>{{ state.companion.happiness }}%</strong></div><div class="track happy"><span [style.width.%]="state.companion.happiness"></span></div></div>
         <div class="actions"><button (click)="care('water')" [disabled]="action!==null"><b>💧</b><span>Itatás</span><small>-{{ actionCost('water') }} pont</small></button><button (click)="care('feed')" [disabled]="action!==null"><b>🐟</b><span>Etetés</span><small>-{{ actionCost('feed') }} pont</small></button><button (click)="care('play')" [disabled]="action!==null"><b>✨</b><span>Játék</span><small>-{{ actionCost('play') }} pont</small></button><button (click)="rest()" [disabled]="action!==null"><b>🌙</b><span>Pihenés</span><small>animáció</small></button></div>
-        @if(message){<div class="message ok">{{ message }}</div>} @if(error){<div class="message error">{{ error }}</div>}
+        @if(error){<div class="message error">{{ error }}</div>}
       </aside>
     </section>
 

@@ -2,6 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { AdminProject } from '../../../core/models/admin.model';
 import { AdminService } from '../../../services/admin';
+import { ToastService } from '../../../services/toast';
 
 @Component({
   selector: 'app-admin-projects',
@@ -26,34 +27,42 @@ export class AdminProjects implements OnInit {
     solution: new FormControl('', { nonNullable: true })
   });
 
-  constructor(private adminService: AdminService) {}
+  constructor(private adminService: AdminService, private toast: ToastService) {}
 
   ngOnInit(): void {
     this.load();
   }
 
   load(): void {
-    this.adminService.getProjects().subscribe(p => this.projects = p);
+    this.adminService.getProjects().subscribe({
+      next: projects => this.projects = projects,
+      error: () => this.toast.error('Nem sikerült betölteni a projekteket.')
+    });
   }
 
   save(): void {
-    if (this.form.invalid) return;
+    if (this.form.invalid) {
+      this.form.markAllAsTouched();
+      return;
+    }
 
     const data = this.form.getRawValue();
-
     const request = this.editing
       ? this.adminService.updateProject(this.editing.id, data)
       : this.adminService.createProject(data);
 
-    request.subscribe(() => {
-      this.reset();
-      this.load();
+    request.subscribe({
+      next: response => {
+        this.toast.success(response.message ?? 'Projekt elmentve.');
+        this.reset();
+        this.load();
+      },
+      error: error => this.toast.error(this.firstError(error, 'Nem sikerült menteni a projektet.'))
     });
   }
 
   edit(project: AdminProject): void {
     this.editing = project;
-
     this.form.setValue({
       title: project.title,
       description: project.description,
@@ -71,12 +80,17 @@ export class AdminProjects implements OnInit {
 
   remove(id: number): void {
     if (!confirm('Biztosan törlöd a projektet?')) return;
-    this.adminService.deleteProject(id).subscribe(() => this.load());
+    this.adminService.deleteProject(id).subscribe({
+      next: response => {
+        this.toast.success(response.message ?? 'Projekt törölve.');
+        this.load();
+      },
+      error: error => this.toast.error(this.firstError(error, 'Nem sikerült törölni a projektet.'))
+    });
   }
 
   reset(): void {
     this.editing = null;
-
     this.form.reset({
       title: '',
       description: '',
@@ -90,5 +104,14 @@ export class AdminProjects implements OnInit {
       expected_output: '',
       solution: ''
     });
+  }
+
+  private firstError(error: any, fallback: string): string {
+    const errors = error.error?.errors;
+    if (errors) {
+      const key = Object.keys(errors)[0];
+      return errors[key]?.[0] ?? fallback;
+    }
+    return error.error?.message ?? fallback;
   }
 }

@@ -174,7 +174,8 @@ export class ProjectDetail implements OnInit {
 
   @HostListener('window:message', ['$event'])
   onRunnerMessage(event: MessageEvent<unknown>): void {
-    if (!this.project || !this.isRunnerMessage(event.data)) return;
+    const frameWindow = this.previewFrame?.nativeElement.contentWindow;
+    if (!this.project || !frameWindow || event.source !== frameWindow || !this.isRunnerMessage(event.data)) return;
 
     const message = event.data;
     if (message.token !== this.runnerToken || message.projectId !== this.project.id) return;

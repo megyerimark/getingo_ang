@@ -1,13 +1,14 @@
 import { TestBed } from '@angular/core/testing';
+import { provideHttpClient } from '@angular/common/http';
 
-import { Favorite } from './favorite';
+import { FavoriteService } from './favorite';
 
-describe('Favorite', () => {
-  let service: Favorite;
+describe('FavoriteService', () => {
+  let service: FavoriteService;
 
   beforeEach(() => {
-    TestBed.configureTestingModule({});
-    service = TestBed.inject(Favorite);
+    TestBed.configureTestingModule({ providers: [provideHttpClient()] });
+    service = TestBed.inject(FavoriteService);
   });
 
   it('should be created', () => {

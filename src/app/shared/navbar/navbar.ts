@@ -1,6 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { Router, RouterLink, RouterLinkActive } from '@angular/router';
 import { Auth } from '../../services/auth';
+import { ToastService } from '../../services/toast';
 
 @Component({
   selector: 'app-navbar',
@@ -16,7 +17,8 @@ export class Navbar implements OnInit {
 
   constructor(
     public auth: Auth,
-    private router: Router
+    private router: Router,
+    private toast: ToastService
   ) {}
 
   ngOnInit(): void {
@@ -35,13 +37,11 @@ export class Navbar implements OnInit {
     this.closeMenu();
 
     this.auth.logout().subscribe({
-      next: () => {
+      next: response => {
+        this.toast.success(response.message ?? 'Sikeresen kijelentkeztél.');
         this.router.navigate(['/']);
       },
-      error: () => {
-        this.auth.clearAuth();
-        this.router.navigate(['/']);
-      }
+      error: () => this.toast.error('A kijelentkezés nem sikerült. Próbáld újra.')
     });
   }
 }

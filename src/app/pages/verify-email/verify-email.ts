@@ -3,6 +3,7 @@ import { Router, RouterLink } from '@angular/router';
 import { finalize } from 'rxjs';
 import { Auth } from '../../services/auth';
 import { User } from '../../core/models/user.model';
+import { ToastService } from '../../services/toast';
 
 @Component({
   selector: 'app-verify-email',
@@ -12,13 +13,12 @@ import { User } from '../../core/models/user.model';
 })
 export class VerifyEmail implements OnInit {
   user: User | null = null;
-  message = '';
-  errorMessage = '';
   isLoading = false;
 
   constructor(
     private auth: Auth,
-    private router: Router
+    private router: Router,
+    private toast: ToastService
   ) {}
 
   ngOnInit(): void {
@@ -39,21 +39,19 @@ export class VerifyEmail implements OnInit {
       return;
     }
 
-    this.message = '';
-    this.errorMessage = '';
     this.isLoading = true;
 
     this.auth.resendVerificationEmail()
       .pipe(finalize(() => this.isLoading = false))
       .subscribe({
-        next: response => this.message = response.message,
+        next: response => this.toast.success(response.message),
         error: error => {
           if (error.status === 429) {
-            this.errorMessage = 'Túl sok kérés. Várj egy kicsit, majd próbáld újra.';
+            this.toast.warning('Túl sok kérés. Várj egy kicsit, majd próbáld újra.');
             return;
           }
 
-          this.errorMessage = error.error?.message ?? 'Nem sikerült újraküldeni az emailt.';
+          this.toast.error(error.error?.message ?? 'Nem sikerült újraküldeni az emailt.');
         }
       });
   }
@@ -68,8 +66,9 @@ export class VerifyEmail implements OnInit {
           return;
         }
 
-        this.message = 'Az email cím még nincs megerősítve.';
-      }
+        this.toast.info('Az email cím még nincs megerősítve.');
+      },
+      error: () => this.toast.error('Nem sikerült ellenőrizni az email megerősítését.')
     });
   }
 

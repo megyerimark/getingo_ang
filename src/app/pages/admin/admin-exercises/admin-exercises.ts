@@ -3,6 +3,7 @@ import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angula
 import { Category } from '../../../core/models/category.model';
 import { AdminExercise } from '../../../core/models/admin.model';
 import { AdminService } from '../../../services/admin';
+import { ToastService } from '../../../services/toast';
 
 @Component({
   selector: 'app-admin-exercises',
@@ -22,37 +23,48 @@ export class AdminExercises implements OnInit {
     solution: new FormControl('', { nonNullable: true })
   });
 
-  constructor(private adminService: AdminService) {}
+  constructor(private adminService: AdminService, private toast: ToastService) {}
 
   ngOnInit(): void {
     this.load();
-    this.adminService.getCategories().subscribe(c => this.categories = c);
+    this.adminService.getCategories().subscribe({
+      next: categories => this.categories = categories,
+      error: () => this.toast.error('Nem sikerült betölteni a kategóriákat.')
+    });
   }
 
   load(): void {
-    this.adminService.getExercises().subscribe(e => this.exercises = e);
+    this.adminService.getExercises().subscribe({
+      next: exercises => this.exercises = exercises,
+      error: () => this.toast.error('Nem sikerült betölteni a feladatokat.')
+    });
   }
 
   save(): void {
-    if (this.form.invalid) return;
+    if (this.form.invalid) {
+      this.form.markAllAsTouched();
+      return;
+    }
 
     const data = this.form.getRawValue();
-
     if (!data.category_id) return;
 
     const request = this.editing
       ? this.adminService.updateExercise(this.editing.id, data as any)
       : this.adminService.createExercise(data as any);
 
-    request.subscribe(() => {
-      this.reset();
-      this.load();
+    request.subscribe({
+      next: response => {
+        this.toast.success(response.message ?? 'Feladat elmentve.');
+        this.reset();
+        this.load();
+      },
+      error: error => this.toast.error(this.firstError(error, 'Nem sikerült menteni a feladatot.'))
     });
   }
 
   edit(exercise: AdminExercise): void {
     this.editing = exercise;
-
     this.form.setValue({
       category_id: exercise.category_id,
       title: exercise.title,
@@ -64,18 +76,26 @@ export class AdminExercises implements OnInit {
 
   remove(id: number): void {
     if (!confirm('Biztosan törlöd?')) return;
-    this.adminService.deleteExercise(id).subscribe(() => this.load());
+    this.adminService.deleteExercise(id).subscribe({
+      next: response => {
+        this.toast.success(response.message ?? 'Feladat törölve.');
+        this.load();
+      },
+      error: error => this.toast.error(this.firstError(error, 'Nem sikerült törölni a feladatot.'))
+    });
   }
 
   reset(): void {
     this.editing = null;
+    this.form.reset({ category_id: null, title: '', description: '', difficulty: 'kezdő', solution: '' });
+  }
 
-    this.form.reset({
-      category_id: null,
-      title: '',
-      description: '',
-      difficulty: 'kezdő',
-      solution: ''
-    });
+  private firstError(error: any, fallback: string): string {
+    const errors = error.error?.errors;
+    if (errors) {
+      const key = Object.keys(errors)[0];
+      return errors[key]?.[0] ?? fallback;
+    }
+    return error.error?.message ?? fallback;
   }
 }

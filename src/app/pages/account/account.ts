@@ -4,6 +4,7 @@ import { Router, RouterLink } from '@angular/router';
 import { finalize } from 'rxjs';
 import { AccountService } from '../../services/account';
 import { Auth } from '../../services/auth';
+import { ToastService } from '../../services/toast';
 
 @Component({
   selector: 'app-account',
@@ -12,15 +13,11 @@ import { Auth } from '../../services/auth';
   styleUrl: './account.scss'
 })
 export class Account implements OnInit {
-  profileMessage = '';
-  profileError = '';
-  passwordMessage = '';
-  passwordError = '';
-  deleteError = '';
   isSavingProfile = false;
   isChangingPassword = false;
   isExporting = false;
   isDeleting = false;
+  private originalEmail = '';
 
   profileForm = new FormGroup({
     name: new FormControl('', {
@@ -63,18 +60,19 @@ export class Account implements OnInit {
   constructor(
     public auth: Auth,
     private accountService: AccountService,
-    private router: Router
+    private router: Router,
+    private toast: ToastService
   ) {}
 
   ngOnInit(): void {
-    this.auth.me().subscribe({
-      next: user => {
-        this.profileForm.patchValue({
-          name: user.name,
-          email: user.email
-        });
-      },
-      error: () => this.router.navigate(['/login'])
+    this.auth.ensureSession().subscribe(user => {
+      if (!user) {
+        this.router.navigate(['/login']);
+        return;
+      }
+
+      this.originalEmail = user.email.trim().toLowerCase();
+      this.profileForm.patchValue({ name: user.name, email: user.email });
     });
   }
 
@@ -84,32 +82,34 @@ export class Account implements OnInit {
       return;
     }
 
-    this.profileMessage = '';
-    this.profileError = '';
-    this.isSavingProfile = true;
-
     const value = this.profileForm.getRawValue();
+    const normalizedEmail = value.email.trim().toLowerCase();
+    const emailChanged = normalizedEmail !== this.originalEmail;
 
+    if (emailChanged && !value.current_password.trim()) {
+      this.profileForm.controls.current_password.setErrors({ required: true });
+      this.toast.warning('Email cím módosításához add meg a jelenlegi jelszavadat.');
+      return;
+    }
+
+    this.isSavingProfile = true;
     this.accountService.updateProfile({
       name: value.name,
-      email: value.email,
+      email: normalizedEmail,
       current_password: value.current_password || undefined
-    })
-      .pipe(finalize(() => this.isSavingProfile = false))
-      .subscribe({
-        next: response => {
-          this.auth.currentUser.set(response.user);
-          this.profileMessage = response.message;
-          this.profileForm.controls.current_password.setValue('');
+    }).pipe(finalize(() => this.isSavingProfile = false)).subscribe({
+      next: response => {
+        this.auth.currentUser.set(response.user);
+        this.originalEmail = response.user.email.trim().toLowerCase();
+        this.profileForm.controls.current_password.setValue('');
+        this.toast.success(response.message);
 
-          if (!response.user.email_verified_at) {
-            this.router.navigate(['/verify-email']);
-          }
-        },
-        error: error => {
-          this.profileError = this.firstError(error, 'Nem sikerült menteni a fiókadatokat.');
+        if (!response.user.email_verified_at) {
+          this.router.navigate(['/verify-email']);
         }
-      });
+      },
+      error: error => this.toast.error(this.firstError(error, 'Nem sikerült menteni a fiókadatokat.'))
+    });
   }
 
   changePassword(): void {
@@ -119,34 +119,26 @@ export class Account implements OnInit {
     }
 
     const value = this.passwordForm.getRawValue();
-
     if (value.password !== value.password_confirmation) {
-      this.passwordError = 'A két új jelszó nem egyezik.';
+      this.passwordForm.controls.password_confirmation.setErrors({ mismatch: true });
+      this.toast.warning('A két új jelszó nem egyezik.');
       return;
     }
 
-    this.passwordMessage = '';
-    this.passwordError = '';
     this.isChangingPassword = true;
-
     this.accountService.changePassword(value)
       .pipe(finalize(() => this.isChangingPassword = false))
       .subscribe({
         next: response => {
-          this.passwordMessage = response.message;
           this.passwordForm.reset();
-          this.auth.clearAuth();
-          this.router.navigate(['/login']);
+          this.toast.success(response.message);
         },
-        error: error => {
-          this.passwordError = this.firstError(error, 'Nem sikerült megváltoztatni a jelszót.');
-        }
+        error: error => this.toast.error(this.firstError(error, 'Nem sikerült megváltoztatni a jelszót.'))
       });
   }
 
   exportData(): void {
     this.isExporting = true;
-
     this.accountService.exportData()
       .pipe(finalize(() => this.isExporting = false))
       .subscribe({
@@ -159,7 +151,9 @@ export class Account implements OnInit {
           link.click();
           link.remove();
           URL.revokeObjectURL(url);
-        }
+          this.toast.success('A személyes adataid exportja elkészült.');
+        },
+        error: () => this.toast.error('Nem sikerült letölteni a személyes adataidat.')
       });
   }
 
@@ -169,30 +163,25 @@ export class Account implements OnInit {
       return;
     }
 
-    this.deleteError = '';
     this.isDeleting = true;
-
     this.accountService.deleteAccount(this.deleteForm.controls.password.value)
       .pipe(finalize(() => this.isDeleting = false))
       .subscribe({
-        next: () => {
+        next: response => {
           this.auth.clearAuth();
           this.router.navigate(['/']);
+          this.toast.success(response.message ?? 'A fiókod törlése sikerült.');
         },
-        error: error => {
-          this.deleteError = this.firstError(error, 'Nem sikerült törölni a fiókot.');
-        }
+        error: error => this.toast.error(this.firstError(error, 'Nem sikerült törölni a fiókot.'))
       });
   }
 
   private firstError(error: any, fallback: string): string {
     const errors = error.error?.errors;
-
     if (errors) {
       const firstKey = Object.keys(errors)[0];
       return errors[firstKey]?.[0] ?? fallback;
     }
-
     return error.error?.message ?? fallback;
   }
 }

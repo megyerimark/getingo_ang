@@ -8,6 +8,7 @@ import { FavoriteService } from '../../services/favorite';
 import { ProgressService } from '../../services/progress';
 import { PersonalCodeService } from '../../services/personal-code';
 import { Auth } from '../../services/auth';
+import { ToastService } from '../../services/toast';
 import { CodeRunner } from '../../shared/code-runner/code-runner';
 import { LessonQuiz } from '../../shared/lesson-quiz/lesson-quiz';
 
@@ -30,7 +31,6 @@ export class Lessons implements OnInit {
   codeLoading = false;
   personalCodeSaved = false;
 
-  message = '';
   errorMessage = '';
 
   htmlCode = new FormControl('', { nonNullable: true });
@@ -49,7 +49,8 @@ export class Lessons implements OnInit {
     private favoriteService: FavoriteService,
     private progressService: ProgressService,
     private personalCodeService: PersonalCodeService,
-    public auth: Auth
+    public auth: Auth,
+    private toast: ToastService
   ) {}
 
   ngOnInit(): void {
@@ -92,6 +93,7 @@ export class Lessons implements OnInit {
         this.auth.restoreSession().subscribe(user => {
           if (user) {
             this.loadNotes();
+            this.loadGuestCode();
             this.loadPersonalCode();
           } else {
             this.loadGuestCode();
@@ -138,15 +140,14 @@ export class Lessons implements OnInit {
     this.activeLesson = lesson;
     const section = this.sections.find(item => item.lessons.some(entry => entry.id === lesson.id));
     if (section) this.openSectionIds.add(section.id);
-    this.message = '';
     this.errorMessage = '';
 
     this.loadActiveNote();
 
+    this.loadGuestCode();
+
     if (this.auth.isLoggedIn()) {
       this.loadPersonalCode();
-    } else {
-      this.loadGuestCode();
     }
 
     window.scrollTo({
@@ -190,8 +191,8 @@ loadGuestCode(): void {
         this.codeLoading = false;
       },
       error: () => {
-        this.loadGuestCode();
         this.codeLoading = false;
+        this.toast.warning('A mentett saját kód most nem tölthető be. Az eredeti példa látható.');
       }
     });
   }
@@ -200,8 +201,7 @@ loadGuestCode(): void {
     if (!this.activeLesson) return;
 
     if (!this.auth.isLoggedIn()) {
-      this.errorMessage =
-        'A saját kód mentéséhez be kell jelentkezned.';
+      this.toast.warning('A saját kód mentéséhez be kell jelentkezned.');
       return;
     }
 
@@ -213,9 +213,7 @@ loadGuestCode(): void {
     ).subscribe({
       next: response => {
         this.personalCodeSaved = response.saved;
-        this.message =
-          response.message ?? 'Saját kód elmentve.';
-        this.errorMessage = '';
+        this.toast.success(response.message ?? 'Saját kód elmentve.');
       },
       error: error => {
         this.handleError(error);
@@ -246,9 +244,7 @@ loadGuestCode(): void {
         );
 
         this.personalCodeSaved = false;
-        this.message =
-          response.message ?? 'Kód visszaállítva.';
-        this.errorMessage = '';
+        this.toast.success(response.message ?? 'Kód visszaállítva.');
       },
       error: error => {
         this.handleError(error);
@@ -294,8 +290,7 @@ loadGuestCode(): void {
       this.note.value.trim()
     ).subscribe({
       next: response => {
-        this.message = response.message;
-        this.errorMessage = '';
+        this.toast.success(response.message ?? 'Jegyzet elmentve.');
 
         const index = this.notes.findIndex(
           item =>
@@ -333,8 +328,7 @@ loadGuestCode(): void {
 
         this.activeNote = null;
         this.note.setValue('');
-        this.message = response.message;
-        this.errorMessage = '';
+        this.toast.success(response.message ?? 'Jegyzet törölve.');
       },
       error: error => {
         this.handleError(error);
@@ -349,9 +343,7 @@ loadGuestCode(): void {
       this.activeLesson.id
     ).subscribe({
       next: response => {
-        this.message =
-          response.message ?? 'Kedvencek frissítve.';
-        this.errorMessage = '';
+        this.toast.success(response.message ?? 'Kedvencek frissítve.');
       },
       error: error => {
         this.handleError(error);
@@ -366,9 +358,7 @@ loadGuestCode(): void {
       this.activeLesson.id
     ).subscribe({
       next: response => {
-        this.message =
-          response.message ?? 'Lecke teljesítve.';
-        this.errorMessage = '';
+        this.toast.success(response.message ?? 'Lecke teljesítve.');
         this.markActiveLessonCompleted();
       },
       error: error => {
@@ -403,27 +393,21 @@ loadGuestCode(): void {
   }
 
   private handleError(error: any): void {
-    this.message = '';
-
     if (error.status === 401) {
-      this.errorMessage =
-        'Ehhez a funkcióhoz be kell jelentkezned.';
+      this.toast.warning('Ehhez a funkcióhoz be kell jelentkezned.');
       return;
     }
 
     if (error.status === 419) {
-      this.errorMessage =
-        'A munkamenet lejárt. Frissítsd az oldalt és próbáld újra.';
+      this.toast.warning('A munkamenet lejárt. Frissítsd az oldalt és próbáld újra.');
       return;
     }
 
     if (error.status === 422) {
-      this.errorMessage =
-        error.error?.message ?? 'Hibás adatok.';
+      this.toast.error(error.error?.message ?? 'Hibás adatok.');
       return;
     }
 
-    this.errorMessage =
-      error.error?.message ?? 'Hiba történt.';
+    this.toast.error(error.error?.message ?? 'Hiba történt.');
   }
 }

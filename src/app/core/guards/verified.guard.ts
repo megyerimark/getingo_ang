@@ -7,12 +7,11 @@ export const verifiedGuard: CanActivateFn = () => {
   const auth = inject(Auth);
   const router = inject(Router);
 
-  return auth.me().pipe(
-    map(user =>
-      user.email_verified_at
-        ? true
-        : router.createUrlTree(['/verify-email'])
-    ),
+  return auth.ensureSession().pipe(
+    map(user => {
+      if (!user) return router.createUrlTree(['/login']);
+      return user.email_verified_at ? true : router.createUrlTree(['/verify-email']);
+    }),
     catchError(() => of(router.createUrlTree(['/login'])))
   );
 };

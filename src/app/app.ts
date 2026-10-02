@@ -5,10 +5,11 @@ import { Footer } from './shared/footer/footer';
 import { CookieConsent } from './shared/cookie-consent/cookie-consent';
 import { Navbar } from './shared/navbar/navbar';
 import { Auth } from './services/auth';
+import { ToastContainer } from './shared/toast/toast';
 
 @Component({
   selector: 'app-root',
-  imports: [RouterOutlet, Navbar, Footer, CookieConsent],
+  imports: [RouterOutlet, Navbar, Footer, CookieConsent, ToastContainer],
   templateUrl: './app.html',
   styleUrl: './app.scss'
 })

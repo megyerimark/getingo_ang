@@ -9,14 +9,6 @@
       címre. Kattints a levélben található gombra, hogy elérd a dashboardot, az XP-t és a Getingo Buddyt.
     </p>
 
-    @if (message) {
-      <div class="status success"><i class="bi bi-check-circle"></i>{{ message }}</div>
-    }
-
-    @if (errorMessage) {
-      <div class="status error"><i class="bi bi-exclamation-circle"></i>{{ errorMessage }}</div>
-    }
-
     <div class="verify-actions">
       <button type="button" class="primary" (click)="refreshStatus()">
         <i class="bi bi-arrow-clockwise"></i>

@@ -2,6 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Category } from '../../../core/models/category.model';
 import { AdminService } from '../../../services/admin';
+import { ToastService } from '../../../services/toast';
 
 @Component({
   selector: 'app-admin-categories',
@@ -12,8 +13,6 @@ import { AdminService } from '../../../services/admin';
 export class AdminCategories implements OnInit {
   categories: Category[] = [];
   editingId: number | null = null;
-  message = '';
-  errorMessage = '';
 
   form = new FormGroup({
     name: new FormControl('', { nonNullable: true, validators: [Validators.required, Validators.maxLength(255)] }),
@@ -21,7 +20,7 @@ export class AdminCategories implements OnInit {
     sort_order: new FormControl(0, { nonNullable: true, validators: [Validators.required, Validators.min(0)] })
   });
 
-  constructor(private adminService: AdminService) {}
+  constructor(private adminService: AdminService, private toast: ToastService) {}
 
   ngOnInit(): void {
     this.load();
@@ -30,27 +29,19 @@ export class AdminCategories implements OnInit {
   load(): void {
     this.adminService.getCategories().subscribe({
       next: categories => this.categories = categories,
-      error: () => this.errorMessage = 'Nem sikerült betölteni a kategóriákat.'
+      error: () => this.toast.error('Nem sikerült betölteni a kategóriákat.')
     });
   }
 
   edit(category: Category): void {
     this.editingId = category.id;
-    this.form.patchValue({
-      name: category.name,
-      slug: category.slug,
-      sort_order: category.sort_order
-    });
+    this.form.patchValue({ name: category.name, slug: category.slug, sort_order: category.sort_order });
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }
 
   cancel(): void {
     this.editingId = null;
-    this.form.reset({
-      name: '',
-      slug: '',
-      sort_order: 0
-    });
+    this.form.reset({ name: '', slug: '', sort_order: 0 });
   }
 
   generateSlug(): void {
@@ -72,36 +63,29 @@ export class AdminCategories implements OnInit {
       return;
     }
 
-    this.message = '';
-    this.errorMessage = '';
-
-    const data = this.form.getRawValue();
     const request = this.editingId
-      ? this.adminService.updateCategory(this.editingId, data)
-      : this.adminService.createCategory(data);
+      ? this.adminService.updateCategory(this.editingId, this.form.getRawValue())
+      : this.adminService.createCategory(this.form.getRawValue());
 
     request.subscribe({
       next: response => {
-        this.message = response.message;
+        this.toast.success(response.message ?? 'Kategória elmentve.');
         this.cancel();
         this.load();
       },
-      error: error => this.errorMessage = this.getError(error)
+      error: error => this.toast.error(this.getError(error))
     });
   }
 
   delete(category: Category): void {
     if (!confirm(`Biztosan törlöd a(z) "${category.name}" kategóriát?`)) return;
 
-    this.message = '';
-    this.errorMessage = '';
-
     this.adminService.deleteCategory(category.id).subscribe({
       next: response => {
-        this.message = response.message;
+        this.toast.success(response.message ?? 'Kategória törölve.');
         this.load();
       },
-      error: error => this.errorMessage = this.getError(error)
+      error: error => this.toast.error(this.getError(error))
     });
   }
 
@@ -109,13 +93,11 @@ export class AdminCategories implements OnInit {
     if (error.status === 409) return error.error?.message ?? 'A kategória nem törölhető.';
     if (error.status === 422) {
       const errors = error.error?.errors;
-
       if (errors) {
         const key = Object.keys(errors)[0];
         return errors[key]?.[0] ?? 'Hibás adatok.';
       }
     }
-
     return error.error?.message ?? 'Hiba történt.';
   }
 }
