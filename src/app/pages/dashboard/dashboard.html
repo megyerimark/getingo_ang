@@ -199,12 +199,12 @@
         <div class="buddy-layout">
           <div class="buddy-stage-panel">
             <div class="buddy-scene buddy-scene-webgl">
-              <app-buddy-3d
+              <app-mascot-stage
                 [state]="companionState"
                 [compact]="true"
-                [premium]="user?.is_premium === true"
-                [room]="companionState.companion.selected_room">
-              </app-buddy-3d>
+                [room]="companionState.companion.selected_room"
+                [actionEvent]="companionActionEvent">
+              </app-mascot-stage>
 
               <div class="era-chip webgl-era-chip">
                 <span>Korszak {{ companionState.growth.era }}/10</span>
@@ -223,7 +223,7 @@
 
             <a class="open-buddy-room" routerLink="/buddy">
               <i class="bi bi-box-arrow-up-right"></i>
-              Teljes 3D Buddy szoba megnyitása
+              Buddy világ megnyitása
             </a>
 
             <div class="buddy-identity">

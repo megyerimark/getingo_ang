@@ -1,4 +1,7 @@
 export type CompanionActionKey = 'water' | 'feed' | 'play';
+export type CompanionVisualAction = CompanionActionKey | 'pet' | 'rest';
+export interface CompanionActionEvent { id: number; type: CompanionVisualAction; }
+
 export type CompanionStageKey =
   | 'era-1'
   | 'era-2'
@@ -11,9 +14,24 @@ export type CompanionStageKey =
   | 'era-9'
   | 'era-10';
 export type BuddyRoomKey = 'studio' | 'play' | 'night' | 'aurora' | 'cyber';
+export type CompanionSpecies = 'cat' | 'dragon' | 'dog';
 
-export interface CompanionSkin { key: string; name: string; premium: boolean; unlocked: boolean; }
-export interface CompanionRoom { key: BuddyRoomKey; name: string; premium: boolean; unlocked: boolean; }
+export interface CompanionSkin {
+  key: string;
+  name: string;
+  premium: boolean;
+  unlocked: boolean;
+  species: CompanionSpecies;
+  image: string;
+  description: string;
+}
+
+export interface CompanionRoom {
+  key: BuddyRoomKey;
+  name: string;
+  premium: boolean;
+  unlocked: boolean;
+}
 
 export type CompanionMoodKey = 'wilted' | 'calm' | 'happy' | 'radiant';
 

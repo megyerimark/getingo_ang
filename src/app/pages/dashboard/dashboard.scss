@@ -2067,7 +2067,7 @@
 
 /* GETINGO 3D BUDDY V7 */
 .buddy-scene-webgl { position: relative; min-height: 430px; padding: 0; overflow: hidden; background: #07172f; }
-.buddy-scene-webgl app-buddy-3d { position: absolute; inset: 0; width: 100%; height: 100%; }
+.buddy-scene-webgl app-mascot-stage { position: absolute; inset: 0; width: 100%; height: 100%; }
 .webgl-era-chip, .webgl-badges { z-index: 6; }
 .open-buddy-room { display: inline-flex; align-items: center; justify-content: center; gap: 8px; width: 100%; margin: 12px 0 18px; padding: 12px 15px; border: 1px solid #cfe0f4; border-radius: 13px; background: linear-gradient(135deg,#eff6ff,#f5f3ff); color: #234f83; text-decoration: none; font-weight: 850; }
 .open-buddy-room:hover { border-color: #93c5fd; color: #1d4ed8; transform: translateY(-1px); }

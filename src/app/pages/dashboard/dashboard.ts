@@ -1,30 +1,31 @@
-import { Component, OnInit, ViewChild } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
 import { finalize } from 'rxjs';
-import { Auth } from '../../services/auth';
-import { AccountService } from '../../services/account';
-import { User } from '../../core/models/user.model';
-import { Note, NoteService } from '../../services/note';
+import { CompanionActionEvent, CompanionActionKey, CompanionState } from '../../core/models/companion.model';
 import {
-  CompanionActionKey,
-  CompanionState
-} from '../../core/models/companion.model';
+  DashboardLearningData,
+  DashboardNote,
+  DailyGoal,
+  LearningPathItem
+} from '../../core/models/dashboard.model';
+import { User } from '../../core/models/user.model';
+import { AccountService } from '../../services/account';
+import { Auth } from '../../services/auth';
 import { CompanionService } from '../../services/companion';
 import { DashboardService } from '../../services/dashboard';
-import { DashboardLearningData, DailyGoal, LearningPathItem } from '../../core/models/dashboard.model';
-import { Buddy3D } from '../../shared/buddy-3d/buddy-3d';
+import { NoteService } from '../../services/note';
+import { MascotStage } from '../../shared/mascot-stage/mascot-stage';
 
 @Component({
   selector: 'app-dashboard',
-  imports: [ReactiveFormsModule, RouterLink, Buddy3D],
+  imports: [ReactiveFormsModule, RouterLink, MascotStage],
   templateUrl: './dashboard.html',
   styleUrl: './dashboard.scss'
 })
 export class Dashboard implements OnInit {
-  @ViewChild(Buddy3D) buddy3d?: Buddy3D;
   user: User | null = null;
-  notes: Note[] = [];
+  notes: DashboardNote[] = [];
   companionState: CompanionState | null = null;
   learningData: DashboardLearningData | null = null;
   learningLoading = true;
@@ -34,22 +35,18 @@ export class Dashboard implements OnInit {
   companionLoading = true;
   companionAction: CompanionActionKey | null = null;
   lastCompanionAction: CompanionActionKey | null = null;
+  companionActionEvent: CompanionActionEvent | null = null;
   buddyAnimating = false;
   companionMessage = '';
   companionError = '';
   showDeletePanel = false;
   isDeleting = false;
   deleteError = '';
+  private companionActionEventId = 0;
 
   deleteForm = new FormGroup({
-    password: new FormControl('', {
-      nonNullable: true,
-      validators: [Validators.required]
-    }),
-    confirm: new FormControl(false, {
-      nonNullable: true,
-      validators: [Validators.requiredTrue]
-    })
+    password: new FormControl('', { nonNullable: true, validators: [Validators.required] }),
+    confirm: new FormControl(false, { nonNullable: true, validators: [Validators.requiredTrue] })
   });
 
   constructor(
@@ -62,32 +59,26 @@ export class Dashboard implements OnInit {
   ) {}
 
   ngOnInit(): void {
-    this.loadUser();
+    this.user = this.auth.currentUser();
+    this.isLoading = false;
     this.loadLearningDashboard();
-    this.loadNotes();
-    this.loadCompanion();
-  }
-
-  loadUser(): void {
-    this.auth.me().subscribe({
-      next: user => {
-        this.user = user;
-        this.isLoading = false;
-      },
-      error: () => {
-        this.isLoading = false;
-      }
-    });
   }
 
   loadLearningDashboard(): void {
     this.learningLoading = true;
+    this.notesLoading = true;
+    this.companionLoading = true;
     this.learningError = '';
+    this.companionError = '';
 
     this.dashboardService.getLearningDashboard().subscribe({
       next: data => {
         this.learningData = data;
+        this.notes = data.notes;
+        this.companionState = data.companion;
         this.learningLoading = false;
+        this.notesLoading = false;
+        this.companionLoading = false;
 
         if (this.user) {
           this.user.current_streak = data.user.current_streak;
@@ -96,8 +87,11 @@ export class Dashboard implements OnInit {
         }
       },
       error: () => {
-        this.learningError = 'A tanulási útvonal most nem tölthető be.';
+        this.learningError = 'A személyes dashboard most nem tölthető be.';
+        this.companionError = 'A Getingo Buddy most nem tölthető be.';
         this.learningLoading = false;
+        this.notesLoading = false;
+        this.companionLoading = false;
       }
     });
   }
@@ -121,10 +115,7 @@ export class Dashboard implements OnInit {
 
   dailyGoalRoute(goal: DailyGoal): string | any[] {
     const match = goal.url.match(/^\/categories\/(\d+)\/lessons/);
-    if (match) {
-      return ['/categories', Number(match[1]), 'lessons'];
-    }
-
+    if (match) return ['/categories', Number(match[1]), 'lessons'];
     return goal.url;
   }
 
@@ -143,32 +134,6 @@ export class Dashboard implements OnInit {
     return item.name.slice(0, 2).toUpperCase();
   }
 
-  loadNotes(): void {
-    this.noteService.getAll().subscribe({
-      next: notes => {
-        this.notes = notes;
-        this.notesLoading = false;
-      },
-      error: () => {
-        this.notesLoading = false;
-      }
-    });
-  }
-
-  loadCompanion(): void {
-    this.companionLoading = true;
-    this.companionService.getState().subscribe({
-      next: state => {
-        this.companionState = state;
-        this.companionLoading = false;
-      },
-      error: () => {
-        this.companionError = 'A Getingo Buddy most nem tölthető be.';
-        this.companionLoading = false;
-      }
-    });
-  }
-
   careForCompanion(action: CompanionActionKey): void {
     if (this.companionAction) return;
 
@@ -179,11 +144,12 @@ export class Dashboard implements OnInit {
     this.companionService.performAction(action).subscribe({
       next: response => {
         this.companionState = response.state;
+        if (this.learningData) this.learningData.companion = response.state;
         this.companionMessage = response.message;
         this.lastCompanionAction = action;
+        this.companionActionEvent = { id: ++this.companionActionEventId, type: action };
         this.companionAction = null;
         this.triggerBuddyAnimation();
-        setTimeout(() => this.buddy3d?.playAction(action));
       },
       error: err => {
         this.companionError =
@@ -214,69 +180,40 @@ export class Dashboard implements OnInit {
     return '';
   }
 
-  buddyAsset(): string {
-    if (this.companionState?.companion.selected_skin?.includes('dog')) {
-      return '/buddy-dog.png';
-    }
-
-    return '/buddy-cat-3d.png';
-  }
-
-  buddyWidth(): number {
-    const size = this.companionState?.growth.size_percentage ?? 70;
-    return Math.round(180 * (size / 70));
-  }
-
   moodEmoji(): string {
     switch (this.companionState?.mood.key) {
-      case 'radiant':
-        return '🌟';
-      case 'happy':
-        return '😸';
-      case 'calm':
-        return '🙂';
-      default:
-        return '😴';
+      case 'radiant': return '🌟';
+      case 'happy': return '😸';
+      case 'calm': return '🙂';
+      default: return '😴';
     }
   }
 
   companionTip(): string {
-    if (!this.companionState) {
-      return 'Teljesíts egy leckét, hogy pontokat szerezz a buddy gondozásához.';
-    }
+    if (!this.companionState) return 'Teljesíts egy leckét, hogy pontokat szerezz a Buddy gondozásához.';
 
     const { water, hunger, happiness } = this.companionState.companion;
     const minimum = Math.min(water, hunger, happiness);
-
-    if (minimum === water) {
-      return 'Pixel most egy kis itatásnak örülne a legjobban.';
-    }
-
-    if (minimum === hunger) {
-      return 'Adj neki egy falatot, hogy újra lendületbe jöjjön.';
-    }
-
+    if (minimum === water) return 'Pixel most egy kis itatásnak örülne a legjobban.';
+    if (minimum === hunger) return 'Adj neki egy falatot, hogy újra lendületbe jöjjön.';
     return 'Játssz vele egyet, hogy még vidámabb legyen.';
   }
 
   progressHint(): string {
-    if (!this.companionState) {
-      return 'Minden lecke és kvíz közelebb visz a következő szinthez.';
-    }
-
+    if (!this.companionState) return 'Minden lecke és kvíz közelebb visz a következő szinthez.';
     if (this.companionState.growth.level >= this.companionState.growth.max_level) {
       return 'Elérted a 100. szintet: Pixel a legmagasabb Getingo Buddy formájában van.';
     }
-
     return `Még ${this.companionState.growth.points_to_next_level} fejlődési pont kell a ${this.companionState.growth.level + 1}. szinthez.`;
   }
 
-  deleteNote(note: Note): void {
+  deleteNote(note: DashboardNote): void {
     if (!confirm('Biztosan törlöd ezt a jegyzetet?')) return;
 
     this.noteService.delete(note.id).subscribe({
       next: () => {
         this.notes = this.notes.filter(item => item.id !== note.id);
+        if (this.learningData) this.learningData.notes = this.notes;
       }
     });
   }
@@ -284,10 +221,7 @@ export class Dashboard implements OnInit {
   toggleDeletePanel(): void {
     this.showDeletePanel = !this.showDeletePanel;
     this.deleteError = '';
-
-    if (!this.showDeletePanel) {
-      this.deleteForm.reset({ password: '', confirm: false });
-    }
+    if (!this.showDeletePanel) this.deleteForm.reset({ password: '', confirm: false });
   }
 
   deleteAccount(): void {
@@ -313,7 +247,6 @@ export class Dashboard implements OnInit {
             this.deleteError = errors[firstKey]?.[0] ?? 'Nem sikerült törölni a fiókot.';
             return;
           }
-
           this.deleteError = error.error?.message ?? 'Nem sikerült törölni a fiókot.';
         }
       });
@@ -333,9 +266,7 @@ export class Dashboard implements OnInit {
     this.buddyAnimating = false;
     setTimeout(() => {
       this.buddyAnimating = true;
-      setTimeout(() => {
-        this.buddyAnimating = false;
-      }, 900);
+      setTimeout(() => this.buddyAnimating = false, 900);
     });
   }
 }

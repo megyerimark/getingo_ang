@@ -145,14 +145,14 @@
           @for (lesson of latestLessons; track lesson.id) {
             <a
               class="lesson-card"
-              [routerLink]="['/categories', lesson.categoryId, 'lessons']"
+              [routerLink]="['/categories', lesson.category_id, 'lessons']"
               [queryParams]="{ lesson: lesson.id }">
               <span class="lesson-icon"><i class="bi bi-code-slash"></i></span>
               <span class="lesson-copy">
                 <strong>{{ lesson.title }}</strong>
                 <small>{{ lessonExcerpt(lesson) }}</small>
               </span>
-              <span class="lesson-meta">{{ lesson.categoryName }}</span>
+              <span class="lesson-meta">{{ lesson.category_name }}</span>
             </a>
           }
         </div>
@@ -213,9 +213,9 @@
         <span class="progress-icon"><i class="bi bi-patch-check-fill"></i></span>
         <div><strong>5 XP</strong><small>az első helyes kvízmegoldásért</small></div>
       </div>
-      <div class="progress-feature">
-        <span class="progress-icon"><i class="bi bi-flower1"></i></span>
-        <div><strong>Getingo Buddy</strong><small>a tudásoddal együtt fejlődik</small></div>
+      <div class="progress-feature buddy-feature">
+        <span class="progress-icon buddy-icon"><img src="/mascots/getingo-cat.webp" alt="Getingo Cica" width="900" height="900" loading="lazy" decoding="async"></span>
+        <div><strong>Getingo Buddy</strong><small>az ingyenes cica a tudásoddal együtt fejlődik</small></div>
       </div>
     </div>
   </div>

@@ -1,3 +1,5 @@
+import { CompanionState } from './companion.model';
+
 export interface DashboardUserSummary {
   id: number;
   name: string;
@@ -53,6 +55,21 @@ export interface AchievementItem {
   unlocked_at: string;
 }
 
+
+export interface DashboardNote {
+  id: number;
+  user_id: number;
+  lesson_id: number;
+  content: string;
+  created_at?: string;
+  updated_at?: string;
+  lesson?: {
+    id: number;
+    title: string;
+    category_id: number;
+  };
+}
+
 export interface DashboardLearningData {
   user: DashboardUserSummary;
   stats: DashboardStats;
@@ -61,4 +78,6 @@ export interface DashboardLearningData {
   daily_goals: DailyGoal[];
   daily_progress_percentage: number;
   recent_achievements: AchievementItem[];
+  notes: DashboardNote[];
+  companion: CompanionState;
 }

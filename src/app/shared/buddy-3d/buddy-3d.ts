@@ -12,7 +12,7 @@ import {
 import * as THREE from 'three';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
 import { RoomEnvironment } from 'three/examples/jsm/environments/RoomEnvironment.js';
-import { BuddyRoomKey, CompanionActionKey, CompanionState } from '../../core/models/companion.model';
+import { BuddyRoomKey, CompanionActionEvent, CompanionActionKey, CompanionState } from '../../core/models/companion.model';
 
 @Component({
   selector: 'app-buddy-3d',
@@ -26,6 +26,7 @@ export class Buddy3D implements AfterViewInit, OnChanges, OnDestroy {
   @Input() premium = false;
   @Input() room: BuddyRoomKey = 'studio';
   @Input() modelUrl = '/models/getingo-buddy/getingo-buddy.glb';
+  @Input() actionEvent: CompanionActionEvent | null = null;
   @ViewChild('canvas', { static: true }) canvasRef!: ElementRef<HTMLCanvasElement>;
 
   modelStatus: 'loading' | 'ready' | 'fallback' | 'error' = 'loading';
@@ -36,6 +37,8 @@ export class Buddy3D implements AfterViewInit, OnChanges, OnDestroy {
   private camera?: THREE.PerspectiveCamera;
   private clock = new THREE.Clock();
   private resizeObserver?: ResizeObserver;
+  private visibilityObserver?: IntersectionObserver;
+  private isVisible = true;
   private animationFrame = 0;
   private loader = new GLTFLoader();
 
@@ -89,6 +92,11 @@ export class Buddy3D implements AfterViewInit, OnChanges, OnDestroy {
     if (changes['state'] || changes['premium']) this.applyState();
     if (changes['room']) this.applyRoom();
     if (changes['modelUrl'] && !changes['modelUrl'].firstChange) this.loadBuddyModel();
+    if (changes['actionEvent'] && this.actionEvent && !changes['actionEvent'].firstChange) {
+      if (this.actionEvent.type === 'pet') this.pet();
+      else if (this.actionEvent.type === 'rest') this.rest();
+      else this.playAction(this.actionEvent.type);
+    }
   }
 
   playAction(action: CompanionActionKey): void {
@@ -122,6 +130,7 @@ export class Buddy3D implements AfterViewInit, OnChanges, OnDestroy {
   ngOnDestroy(): void {
     cancelAnimationFrame(this.animationFrame);
     this.resizeObserver?.disconnect();
+    this.visibilityObserver?.disconnect();
     this.mixer?.stopAllAction();
     this.disposeGroup(this.buddyRoot);
     this.disposeGroup(this.roomGroup);
@@ -167,7 +176,7 @@ export class Buddy3D implements AfterViewInit, OnChanges, OnDestroy {
       alpha: true,
       powerPreference: 'high-performance'
     });
-    this.renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 1.8));
+    this.renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 1.5));
     this.renderer.shadowMap.enabled = true;
     this.renderer.shadowMap.type = THREE.PCFSoftShadowMap;
     this.renderer.outputColorSpace = THREE.SRGBColorSpace;
@@ -189,7 +198,7 @@ export class Buddy3D implements AfterViewInit, OnChanges, OnDestroy {
     const key = new THREE.DirectionalLight(0xfff5e9, 4.1);
     key.position.set(4.4, 7.2, 4.8);
     key.castShadow = true;
-    key.shadow.mapSize.set(2048, 2048);
+    key.shadow.mapSize.set(1024, 1024);
     key.shadow.bias = -.00035;
     this.scene.add(key);
 
@@ -210,8 +219,13 @@ export class Buddy3D implements AfterViewInit, OnChanges, OnDestroy {
     this.buddyRoot.add(this.modelContainer, this.extras, this.props);
     this.scene.add(this.roomGroup, this.buddyRoot);
 
+    const renderTarget = canvas.parentElement ?? canvas;
     this.resizeObserver = new ResizeObserver(() => this.resize());
-    this.resizeObserver.observe(canvas.parentElement ?? canvas);
+    this.resizeObserver.observe(renderTarget);
+    this.visibilityObserver = new IntersectionObserver(entries => {
+      this.isVisible = entries[0]?.isIntersecting ?? true;
+    }, { rootMargin: '120px' });
+    this.visibilityObserver.observe(renderTarget);
     this.resize();
 
     this.zone.runOutsideAngular(() => this.animate());
@@ -620,9 +634,8 @@ export class Buddy3D implements AfterViewInit, OnChanges, OnDestroy {
   private applySkin(skin: string): void {
     const tintMap: Record<string, { tint: number; accent: number; strength: number }> = {
       'code-kitten-3d': { tint: 0xffffff, accent: 0x2787ff, strength: 0 },
-      'arctic-byte': { tint: 0xe7f7ff, accent: 0x61dafb, strength: .14 },
-      'neon-orbit': { tint: 0xe9ddff, accent: 0xff5ed8, strength: .18 },
-      'royal-circuit': { tint: 0xe9e1cf, accent: 0xe4bd60, strength: .22 }
+      'getingo-dragon': { tint: 0xd9eaff, accent: 0x7c3aed, strength: .18 },
+      'getingo-puppy': { tint: 0xf4dfc8, accent: 0xd97706, strength: .2 }
     };
     const config = tintMap[skin] ?? tintMap['code-kitten-3d'];
     const tint = new THREE.Color(config.tint);
@@ -718,6 +731,12 @@ export class Buddy3D implements AfterViewInit, OnChanges, OnDestroy {
   }
 
   private animate = (): void => {
+    if (!this.isVisible || document.hidden) {
+      this.clock.getDelta();
+      this.animationFrame = requestAnimationFrame(this.animate);
+      return;
+    }
+
     const delta = Math.min(.05, this.clock.getDelta());
     const t = this.clock.elapsedTime;
     this.mixer?.update(delta);
