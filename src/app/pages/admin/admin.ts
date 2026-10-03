@@ -6,6 +6,7 @@ import {
   RouterOutlet
 } from '@angular/router';
 import { Auth } from '../../services/auth';
+import { ThemeService } from '../../services/theme';
 
 @Component({
   selector: 'app-admin',
@@ -20,7 +21,8 @@ import { Auth } from '../../services/auth';
 export class Admin {
   constructor(
     private auth: Auth,
-    private router: Router
+    private router: Router,
+    public theme: ThemeService
   ) {}
 
   logout(): void {

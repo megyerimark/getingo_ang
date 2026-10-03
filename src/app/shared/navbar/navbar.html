@@ -53,6 +53,15 @@
       </div>
 
       <div class="nav-actions">
+        <button
+          class="theme-toggle"
+          type="button"
+          [attr.aria-label]="theme.isDark() ? 'Világos téma bekapcsolása' : 'Sötét téma bekapcsolása'"
+          [attr.title]="theme.isDark() ? 'Világos téma' : 'Sötét téma'"
+          (click)="theme.toggle()">
+          <i class="bi" [class.bi-sun-fill]="theme.isDark()" [class.bi-moon-stars-fill]="!theme.isDark()"></i>
+          <span>{{ theme.isDark() ? 'Világos' : 'Sötét' }}</span>
+        </button>
         @if (auth.currentUser(); as user) {
           <span class="user-chip" [class.premium-user-chip]="user.is_premium">
             <span class="user-avatar">{{ user.name.charAt(0).toUpperCase() }}</span>

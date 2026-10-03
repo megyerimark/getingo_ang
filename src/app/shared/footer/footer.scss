@@ -135,3 +135,40 @@
 }
 
 .footer-link-button { padding: 0; border: 0; background: transparent; text-align: left; cursor: pointer; font: inherit; }
+
+/* Egységes mobil szélesség a fő tartalommal */
+.footer-shell,
+.footer-bottom {
+  width: min(1180px, calc(100% - (var(--app-gutter) * 2)));
+}
+
+@media (max-width: 560px) {
+  .site-footer {
+    width: 100%;
+  }
+
+  .footer-shell {
+    padding: 34px 0 26px;
+    gap: 26px;
+  }
+
+  .footer-links {
+    grid-template-columns: 1fr;
+    gap: 20px;
+  }
+
+  .footer-cta {
+    width: 100%;
+    padding: 17px;
+  }
+
+  .footer-button {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .footer-bottom {
+    gap: 8px;
+    padding: 16px 0 max(22px, env(safe-area-inset-bottom));
+  }
+}

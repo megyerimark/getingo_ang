@@ -90,6 +90,35 @@
         </aside>
       </section>
 
+      @if (user.is_premium) {
+        <section class="premium-toolkit-card">
+          <div class="premium-toolkit-heading">
+            <div>
+              <span class="premium-toolkit-kicker"><i class="bi bi-stars"></i> PREMIUM AKTÍV</span>
+              <h2>Nem csak más szín: plusz tanulási eszközök.</h2>
+              <p>A Premium fiókodban a fókuszált tanulás és a részletesebb Mentor diagnózis is elérhető.</p>
+            </div>
+            <span class="premium-live-badge"><i class="bi bi-patch-check-fill"></i> PRO</span>
+          </div>
+          <div class="premium-tool-grid">
+            @if (learningData.next_lesson) {
+              <a [routerLink]="['/categories', learningData.next_lesson.category_id, 'lessons']" [queryParams]="{ lesson: learningData.next_lesson.id }" class="premium-tool">
+                <i class="bi bi-arrows-fullscreen"></i>
+                <span><strong>Fókusz mód</strong><small>Teljes szélességű, zavaró elemek nélküli lecke.</small></span>
+              </a>
+            }
+            <a routerLink="/projects" class="premium-tool">
+              <i class="bi bi-stars"></i>
+              <span><strong>Mentor Pro</strong><small>Többpontos, szerveroldali kóddiagnózis.</small></span>
+            </a>
+            <a routerLink="/buddy" class="premium-tool">
+              <i class="bi bi-gem"></i>
+              <span><strong>Premium Buddy</strong><small>Sárkány, kiskutya és exkluzív szobák.</small></span>
+            </a>
+          </div>
+        </section>
+      }
+
       <section class="learning-path-card">
         <div class="section-heading">
           <div>

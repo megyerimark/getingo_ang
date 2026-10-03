@@ -1,0 +1,12 @@
+<button
+  type="button"
+  class="back-to-top"
+  [class.visible]="visible"
+  [attr.aria-hidden]="!visible"
+  [attr.tabindex]="visible ? 0 : -1"
+  aria-label="Vissza az oldal tetejére"
+  title="Vissza a tetejére"
+  (click)="scrollToTop()">
+  <i class="bi bi-arrow-up"></i>
+  <span>Fel</span>
+</button>

@@ -294,3 +294,31 @@
     padding: 20px 14px;
   }
 }
+
+
+.theme-toggle-admin {
+  min-height: 38px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  padding: 0 11px;
+  border: 1px solid #dde8f5;
+  border-radius: 10px;
+  background: #fff;
+  color: #5f7391;
+  font-size: .75rem;
+  font-weight: 750;
+  transition: .18s ease;
+}
+
+.theme-toggle-admin:hover {
+  border-color: #b7cff0;
+  color: #1677ff;
+  background: #f5f9ff;
+}
+
+@media (max-width: 620px) {
+  .theme-toggle-admin span { display: none; }
+  .theme-toggle-admin { width: 38px; padding: 0; }
+}

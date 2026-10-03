@@ -1,0 +1,5 @@
+Getingo Dark Theme V5
+- Project Lab project header and info cards dark-mode fixes
+- Account page full dark-mode styling
+- Admin Dashboard hero, lists and quick actions dark-mode fixes
+- Keeps browser/project preview iframe intentionally light

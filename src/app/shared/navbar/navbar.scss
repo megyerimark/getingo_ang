@@ -201,7 +201,7 @@
   font-size: 1.35rem;
 }
 
-@media (max-width: 920px) {
+@media (max-width: 1120px) {
   .nav-shell {
     min-height: 66px;
     flex-wrap: wrap;
@@ -286,3 +286,72 @@
   font-weight: 950;
   letter-spacing: .05em;
 }
+
+.theme-toggle {
+  min-height: 40px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  padding: 9px 11px;
+  border: 1px solid #d9e5f5;
+  border-radius: 11px;
+  background: #fff;
+  color: #31547e;
+  font-size: .82rem;
+  font-weight: 800;
+  transition: .2s ease;
+}
+
+.theme-toggle:hover {
+  border-color: #a8cbfb;
+  background: #f6faff;
+  color: #0b66e4;
+}
+
+@media (max-width: 1120px) {
+  :host,
+  .site-navbar {
+    width: 100%;
+  }
+
+  .nav-shell {
+    width: calc(100% - (var(--app-gutter) * 2));
+    max-width: 1180px;
+    min-width: 0;
+  }
+
+  .nav-content.open {
+    max-height: calc(100dvh - 78px);
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    padding-bottom: max(12px, env(safe-area-inset-bottom));
+  }
+
+  .theme-toggle {
+    width: 100%;
+  }
+}
+
+@media (max-width: 420px) {
+  .nav-shell {
+    min-height: 62px;
+    padding: 9px 0;
+  }
+
+  .brand {
+    font-size: 1.2rem;
+  }
+
+  .brand-mark {
+    width: 34px;
+    height: 34px;
+  }
+
+  .menu-toggle {
+    width: 40px;
+    height: 40px;
+  }
+}
+
+.nav-shell { width: min(1180px, calc(100% - (var(--app-gutter) * 2))); }

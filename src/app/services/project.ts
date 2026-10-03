@@ -8,6 +8,7 @@ import {
   ProjectCheckPayload,
   ProjectCheckResponse,
   ProjectListResponse,
+  ProjectMentorResponse,
   ProjectResponse,
   ProjectWorkspacePayload
 } from '../core/models/project.model';
@@ -51,6 +52,14 @@ export class ProjectService {
   check(id: number, payload: ProjectCheckPayload): Observable<ProjectCheckResponse> {
     return this.http.post<ProjectCheckResponse>(
       `${this.apiUrl}/projects/${id}/check`,
+      payload,
+      { withCredentials: true }
+    );
+  }
+
+  mentor(id: number, payload: ProjectCheckPayload): Observable<ProjectMentorResponse> {
+    return this.http.post<ProjectMentorResponse>(
+      `${this.apiUrl}/projects/${id}/mentor`,
       payload,
       { withCredentials: true }
     );

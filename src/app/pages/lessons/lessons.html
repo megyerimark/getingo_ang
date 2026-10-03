@@ -3,7 +3,7 @@
     <div class="spinner-border"></div>
   </div>
 } @else {
-  <div class="lesson-layout">
+  <div class="lesson-layout" [class.focus-mode]="focusMode">
     <aside class="lesson-sidebar">
       @if (curriculum) {
         <div class="course-summary">
@@ -82,7 +82,21 @@
               <span>{{ getActiveSectionName() }}</span>
             </div>
           }
-          <h1>{{ activeLesson.title }}</h1>
+          <div class="lesson-title-row">
+            <h1>{{ activeLesson.title }}</h1>
+            @if (auth.currentUser()?.is_premium) {
+              <button
+                type="button"
+                class="focus-mode-toggle"
+                [class.active]="focusMode"
+                [attr.aria-pressed]="focusMode"
+                (click)="toggleFocusMode()">
+                <i class="bi" [class.bi-arrows-fullscreen]="!focusMode" [class.bi-fullscreen-exit]="focusMode"></i>
+                {{ focusMode ? 'Kilépés a fókuszból' : 'Fókusz mód' }}
+                <span>PRO</span>
+              </button>
+            }
+          </div>
 
           <div class="lesson-text">
             {{ activeLesson.content }}

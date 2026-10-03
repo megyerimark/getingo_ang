@@ -7,6 +7,7 @@ import {
   ProjectWorkspacePayload
 } from '../../core/models/project.model';
 import { ProjectService } from '../../services/project';
+import { Auth } from '../../services/auth';
 
 type EditorTab = 'html' | 'css' | 'javascript' | 'console';
 type MentorTone = 'idle' | 'tip' | 'warning' | 'success';
@@ -49,6 +50,9 @@ export class ProjectDetail implements OnInit {
   mentorHint = 'Futtasd a kódot, majd kérj segítséget. A Mentor nem adja oda a kész megoldást, hanem rávezet a hibára.';
   mentorTone: MentorTone = 'idle';
   mentorAnalyzing = false;
+  mentorSuggestions: string[] = [];
+  mentorTier: 'standard' | 'pro' = 'standard';
+  mentorFocusTab: EditorTab = 'javascript';
 
   private pendingCheck = false;
   private pendingMentor = false;
@@ -56,7 +60,8 @@ export class ProjectDetail implements OnInit {
 
   constructor(
     private route: ActivatedRoute,
-    private projectService: ProjectService
+    private projectService: ProjectService,
+    public auth: Auth
   ) {}
 
   ngOnInit(): void {
@@ -153,7 +158,8 @@ export class ProjectDetail implements OnInit {
     this.mentorOpen = true;
     this.mentorAnalyzing = true;
     this.mentorTone = 'idle';
-    this.mentorHint = 'Átnézem a futási eredményt és keresek egy olyan nyomot, ami közelebb visz a megoldáshoz...';
+    this.mentorHint = 'Átnézem a futási eredményt és összevetem a projekt ellenőrzésével...';
+    this.mentorSuggestions = [];
     this.runProject(false, true);
   }
 
@@ -169,6 +175,7 @@ export class ProjectDetail implements OnInit {
     this.checkPassed = null;
     this.mentorTone = 'idle';
     this.mentorHint = 'A kezdőkód visszaállt. Futtasd, majd ha elakadsz, kérdezd meg a Mentort.';
+    this.mentorSuggestions = [];
     this.runProject();
   }
 
@@ -188,8 +195,7 @@ export class ProjectDetail implements OnInit {
 
     if (this.pendingMentor) {
       this.pendingMentor = false;
-      this.mentorAnalyzing = false;
-      this.generateMentorHint();
+      this.requestMentorAnalysis();
     }
 
     if (this.pendingCheck) {
@@ -249,6 +255,7 @@ export class ProjectDetail implements OnInit {
         : response.already_completed
           ? 'A megoldás továbbra is átmegy az ellenőrzésen. Most már próbáld meg egyszerűsíteni vagy szebben strukturálni a kódot.'
           : 'Sikerült. Nézd meg, melyik gondolat volt a kulcs, mert ezt a mintát később más feladatoknál is használni fogod.';
+      this.mentorSuggestions = [];
       return;
     }
 
@@ -256,6 +263,44 @@ export class ProjectDetail implements OnInit {
       this.mentorOpen = true;
       this.generateMentorHint(true);
     }
+  }
+
+  jumpToMentorFocus(): void {
+    this.activeTab = this.mentorFocusTab;
+    requestAnimationFrame(() => {
+      document.querySelector('.editor-tabs')?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    });
+  }
+
+  mentorFocusLabel(): string {
+    if (this.mentorFocusTab === 'html') return 'HTML';
+    if (this.mentorFocusTab === 'css') return 'CSS';
+    if (this.mentorFocusTab === 'console') return 'Konzol';
+    return 'JavaScript';
+  }
+
+  private requestMentorAnalysis(): void {
+    if (!this.project) return;
+
+    this.projectService.mentor(this.project.id, {
+      ...this.workspacePayload(),
+      console_output: this.consoleOutput
+    }).subscribe({
+      next: response => {
+        this.mentorTier = response.tier;
+        this.mentorTone = response.tone;
+        this.mentorHint = response.summary;
+        this.mentorSuggestions = response.suggestions;
+        this.mentorFocusTab = response.focus_tab;
+        this.mentorAnalyzing = false;
+      },
+      error: () => {
+        this.mentorTier = this.auth.currentUser()?.is_premium ? 'pro' : 'standard';
+        this.mentorSuggestions = [];
+        this.mentorAnalyzing = false;
+        this.generateMentorHint();
+      }
+    });
   }
 
   private generateMentorHint(validationFailed = false): void {

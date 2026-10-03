@@ -6,15 +6,18 @@ import { CookieConsent } from './shared/cookie-consent/cookie-consent';
 import { Navbar } from './shared/navbar/navbar';
 import { Auth } from './services/auth';
 import { ToastContainer } from './shared/toast/toast';
+import { BackToTop } from './shared/back-to-top/back-to-top';
+import { ThemeService } from './services/theme';
 
 @Component({
   selector: 'app-root',
-  imports: [RouterOutlet, Navbar, Footer, CookieConsent, ToastContainer],
+  imports: [RouterOutlet, Navbar, Footer, CookieConsent, ToastContainer, BackToTop],
   templateUrl: './app.html',
   styleUrl: './app.scss'
 })
 export class App {
   private readonly document = inject(DOCUMENT);
+  private readonly theme = inject(ThemeService);
 
   constructor(
     public router: Router,

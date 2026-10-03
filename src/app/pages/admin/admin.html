@@ -134,6 +134,16 @@
 
       <div class="topbar-right">
         <button
+          class="theme-toggle-admin"
+          type="button"
+          [attr.aria-label]="theme.isDark() ? 'Világos téma bekapcsolása' : 'Sötét téma bekapcsolása'"
+          [attr.title]="theme.isDark() ? 'Világos téma' : 'Sötét téma'"
+          (click)="theme.toggle()">
+          <i class="bi" [class.bi-sun-fill]="theme.isDark()" [class.bi-moon-stars-fill]="!theme.isDark()"></i>
+          <span>{{ theme.isDark() ? 'Világos' : 'Sötét' }}</span>
+        </button>
+
+        <button
           class="topbar-icon-button"
           type="button">
           <i class="bi bi-bell"></i>

@@ -65,3 +65,11 @@ export interface ProjectUnlockedAchievement {
   icon: string;
   unlocked_at: string;
 }
+
+export interface ProjectMentorResponse {
+  tier: 'standard' | 'pro';
+  tone: 'idle' | 'tip' | 'warning' | 'success';
+  summary: string;
+  focus_tab: 'html' | 'css' | 'javascript' | 'console';
+  suggestions: string[];
+}

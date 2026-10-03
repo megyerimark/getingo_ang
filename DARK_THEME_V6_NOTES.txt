@@ -1,0 +1,11 @@
+Getingo Dark Theme V6
+
+Javítva:
+- Adatkezelési tájékoztató teljes sötét témája
+- Süti tájékoztató teljes sötét témája
+- Süti táblázatok sötét kártyái
+- Süti banner gombjai és kontrasztja
+- Süti beállítások modal sötét témája
+- Linkek, figyelmeztetések, alcímek és segédszövegek kontrasztja
+
+A világos téma változatlan maradt.

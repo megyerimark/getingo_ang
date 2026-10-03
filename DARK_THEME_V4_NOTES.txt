@@ -1,0 +1,11 @@
+Getingo Dark Theme V4
+
+Javítások:
+- Főoldal: a korábban fehér tartalmi sávok, kártyák és kereső dark módban egységes sötétkék felületet kapnak.
+- Dashboard: Buddy belső panelek, fejlődési panel, tippek és achievement felületek dark módban sötétek.
+- Leckeoldal: kvíz/üres állapotok, Bootstrap alertok, jegyzet és fókusz mód dark színezése javítva.
+- Projektek, portfólió és keresés: üres állapotok és találatkártyák konzisztens dark felületet kapnak.
+- Auth oldalak: a jobb oldali bejelentkezési/regisztrációs panel sem marad fehér.
+- Admin: teljes dark mód hozzáadva a kártyákhoz, táblákhoz, űrlapokhoz, bevételi grafikonokhoz és panelekhez.
+- Admin topbar: külön világos/sötét témakapcsoló került be.
+- A kódfuttató böngésző-előnézete szándékosan világos marad.

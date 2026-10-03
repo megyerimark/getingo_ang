@@ -32,6 +32,7 @@ export class Lessons implements OnInit {
   personalCodeSaved = false;
 
   errorMessage = '';
+  focusMode = false;
 
   htmlCode = new FormControl('', { nonNullable: true });
   cssCode = new FormControl('', { nonNullable: true });
@@ -39,8 +40,17 @@ export class Lessons implements OnInit {
   note = new FormControl('', { nonNullable: true });
   activeCodeTab: 'html' | 'css' | 'javascript' = 'html';
   setCodeTab(tab: 'html' | 'css' | 'javascript'): void {
-  this.activeCodeTab = tab;
-}
+    this.activeCodeTab = tab;
+  }
+
+  toggleFocusMode(): void {
+    if (this.auth.currentUser()?.is_premium !== true) {
+      this.toast.warning('A Fókusz mód Getingo Premium funkció.');
+      return;
+    }
+
+    this.focusMode = !this.focusMode;
+  }
 
   constructor(
     private route: ActivatedRoute,

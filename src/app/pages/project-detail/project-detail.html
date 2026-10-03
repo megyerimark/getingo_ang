@@ -82,8 +82,9 @@
               <button type="button" class="run-button" (click)="runProject()" [disabled]="running">
                 <i class="bi bi-play-fill"></i> {{ running ? 'Fut...' : 'Futtatás' }}
               </button>
-              <button type="button" class="mentor-button" (click)="askMentor()" [disabled]="running || mentorAnalyzing">
-                <i class="bi bi-stars"></i> {{ mentorAnalyzing ? 'Elemzés...' : 'Miért nem működik?' }}
+              <button type="button" class="mentor-button" [class.pro]="auth.currentUser()?.is_premium" (click)="askMentor()" [disabled]="running || mentorAnalyzing">
+                <i class="bi bi-stars"></i>
+                {{ mentorAnalyzing ? 'Elemzés...' : (auth.currentUser()?.is_premium ? 'Mentor Pro elemzés' : 'Miért nem működik?') }}
               </button>
               <button type="button" class="check-button" (click)="checkProject()" [disabled]="checking || running">
                 <i class="bi bi-patch-check"></i> {{ checking ? 'Ellenőrzés...' : 'Ellenőrzés' }}
@@ -103,14 +104,24 @@
           }
 
           @if (mentorOpen) {
-            <aside class="mentor-card" [class.warning]="mentorTone === 'warning'" [class.success]="mentorTone === 'success'">
+            <aside class="mentor-card" [class.warning]="mentorTone === 'warning'" [class.success]="mentorTone === 'success'" [class.pro]="mentorTier === 'pro'">
               <div class="mentor-avatar"><i [class]="'bi ' + mentorIcon()"></i></div>
-              <div>
+              <div class="mentor-content">
                 <div class="mentor-title-row">
-                  <strong>Getingo Mentor</strong>
-                  <span>rávezet, nem megold helyetted</span>
+                  <strong>{{ mentorTier === 'pro' ? 'Getingo Mentor Pro' : 'Getingo Mentor' }}</strong>
+                  <span>{{ mentorTier === 'pro' ? 'PREMIUM · mélyebb diagnózis' : 'rávezet, nem megold helyetted' }}</span>
                 </div>
                 <p>{{ mentorHint }}</p>
+                @if (mentorSuggestions.length) {
+                  <div class="mentor-suggestions">
+                    @for (suggestion of mentorSuggestions; track $index) {
+                      <div class="mentor-suggestion"><i class="bi bi-arrow-right-circle"></i><span>{{ suggestion }}</span></div>
+                    }
+                  </div>
+                  <button type="button" class="mentor-focus-button" (click)="jumpToMentorFocus()">
+                    <i class="bi bi-crosshair"></i> Ugrás ide: {{ mentorFocusLabel() }}
+                  </button>
+                }
               </div>
             </aside>
           }
